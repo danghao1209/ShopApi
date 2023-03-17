@@ -2,10 +2,10 @@ import shortid from "shortid";
 import bcrypt from "bcryptjs";
 import User from "../../Models/UserModel/index.js";
 
-export const registerUser = async (req, res, next) => {
+export const registerUser = async (req, res) => {
   try {
-    const { username, password, ...pre } = req.body;
-    const isHaveUser = await User.findOne({ username });
+    const { email, password, name, ...pre } = req.body;
+    const isHaveUser = await User.findOne({ email });
 
     if (!isHaveUser) {
       if (password) {
@@ -14,25 +14,29 @@ export const registerUser = async (req, res, next) => {
 
         const newUser = new User({
           id: shortid.generate(),
-          username: req.body.username,
+          name: name,
           password: hashedPassword,
-          email: req.body.email,
+          email: email,
         });
         const saveUser = await newUser.save();
         if (saveUser) {
-          res.status(200).json({ status: 1, message: "Đăng kí thành công" });
+          return res
+            .status(200)
+            .json({ status: 1, message: "Đăng kí thành công" });
         } else {
-          res.status(401).json({ status: 0, message: "Đăng kí thất bại" });
+          return res
+            .status(401)
+            .json({ status: 0, message: "Đăng kí thất bại" });
         }
       } else {
-        res
+        return res
           .status(401)
           .json({ status: 0, message: "Password phải từ 6 kí tự" });
       }
     } else {
-      res.status(401).json({ status: 0, message: "Đã tồn tại" });
+      return res.status(401).json({ status: 0, message: "Đã tồn tại" });
     }
   } catch (error) {
-    res.status(401).json(error.message);
+    return res.status(401).json(error.message);
   }
 };
