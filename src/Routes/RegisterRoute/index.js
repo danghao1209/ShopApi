@@ -3,8 +3,8 @@ import express from "express";
 import { registerUser } from "../../Controllers/RegisterController/index.js";
 import { ValidateEmail } from "../../Middleware/ValidateEmail/index.js";
 
-const userRoute = express.Router();
+const userRegisterRoute = express.Router();
 
-userRoute.post("/", ValidateEmail, registerUser);
+userRegisterRoute.post("/", ValidateEmail, registerUser);
 
-export default userRoute;
+export default userRegisterRoute;

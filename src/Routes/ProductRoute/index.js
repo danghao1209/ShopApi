@@ -5,7 +5,7 @@ import {
   addProduct,
 } from "../../Controllers/ProductController/index.js";
 import { upload } from "../../Controllers/UploadImageController/upload.js";
-import { verifyToken } from "../../Middleware/index.js";
+import { verifyToken } from "../../Middleware/VeryfiToken/index.js";
 
 const productRoute = express.Router();
 
