@@ -57,13 +57,11 @@ export const addProduct = async (req, res, next) => {
     });
     await addProduct.save();
 
-    res
-      .status(200)
-      .json({
-        status: "success",
-        message: "Thêm sản phẩm thành công",
-        data: addProduct,
-      });
+    res.status(200).json({
+      status: "success",
+      message: "Thêm sản phẩm thành công",
+      data: addProduct,
+    });
   } catch (e) {
     res.status(404).json(e.message);
   }
