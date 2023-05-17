@@ -1,4 +1,5 @@
 import path from "path";
+import fs from "fs";
 
 export const getImages = (req, res) => {
   try {
@@ -6,7 +7,12 @@ export const getImages = (req, res) => {
       path.resolve("public/imgs/"),
       `${req.params.name}`
     );
-    res.sendFile(imagePath);
+
+    res.writeHead(200, { "Content-Type": "image/jpeg/png" });
+
+    const imageStream = fs.createReadStream(imagePath);
+    imageStream.pipe(res);
+    res.end();
   } catch (error) {
     res.status(404).json({ message: error.message });
   }

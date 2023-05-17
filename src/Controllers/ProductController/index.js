@@ -1,4 +1,5 @@
 import shortid from "shortid";
+import fs from "fs";
 
 import Product from "../../Models/ProductModel/index.js";
 
@@ -6,14 +7,15 @@ export const getAllProduct = async (req, res, next) => {
   try {
     let resultFind = await Product.find({});
     let resultsALl = {
-      products: resultFind,
       total: resultFind.length,
-      skip: 0,
-      limit: 20,
+      products: resultFind,
     };
-    res.status(200).json(resultsALl);
+    return res.status(200).json(resultsALl);
   } catch (e) {
-    res.status(404).json("Error");
+    return res.status(404).json({
+      total: 0,
+      products: {},
+    });
   }
 };
 
@@ -21,23 +23,70 @@ export const getProduct = async (req, res, next) => {
   try {
     let result = await Product.findOne({ id: req.params.id });
     if (result) {
-      res.status(200).json(result);
+      return res.status(200).json(result);
     } else {
-      res.status(404).json("Không có");
+      return res.status(404).json({
+        id: null,
+        title: null,
+        description: [],
+        price: null,
+        new: null,
+        discountPercentage: null,
+        rating: null,
+        data: [],
+        brand: null,
+        category: null,
+        thumbnail: [],
+      });
     }
   } catch (e) {
-    res.status(404).json("Error");
+    return res.status(404).json({
+      id: null,
+      title: null,
+      description: [],
+      price: null,
+      new: null,
+      discountPercentage: null,
+      rating: null,
+      data: [],
+      brand: null,
+      category: null,
+      thumbnail: [],
+    });
   }
 };
 
+const writeImg = (path, data) => {
+  const dataWrite = Buffer.from(
+    data.replace(/^data:image\/\w+;base64,/, ""),
+    "base64"
+  );
+
+  fs.writeFile(path, dataWrite, { encoding: "base64" }, (error) => {
+    if (error) throw error;
+  });
+  let newPath = path.replace("public/", "");
+  return newPath;
+};
+
 export const addProduct = async (req, res, next) => {
+  //đang bị lỗi không add thành công vẫn lưu ảnh => cần tối ưu
   try {
-    let color = req.body.color.split(",");
-    let thumbnail = req.files.thumbnail.map((img) => {
-      return img.path;
+    let result = await Product.findOne({ title: req.body.title });
+    if (result) {
+      throw new Error("Trùng tên sản phẩm");
+    }
+    let thumbnail = req.body.thumbnail.map((item) => {
+      return writeImg(`public/imgs/${shortid.generate()}.png`, item);
     });
-    let images = req.files.images.map((img) => {
-      return img.path;
+    let dataNew = req.body.data.map((data) => {
+      return {
+        ...data,
+        images: data.images.map((item) => {
+          const imagePath = `public/imgs/${shortid.generate()}.png`;
+          return writeImg(imagePath, item);
+        }),
+      };
     });
 
     const addProduct = new Product({
@@ -48,21 +97,23 @@ export const addProduct = async (req, res, next) => {
       discountPercentage: req.body.discountPercentage,
       rating: req.body.rating,
       stock: req.body.stock,
+      data: dataNew,
       brand: req.body.brand,
       category: req.body.category,
-      color: color,
       thumbnail: thumbnail,
-      images: images,
-      published: Date.now(),
     });
     await addProduct.save();
 
-    res.status(200).json({
+    return res.status(200).json({
       status: "success",
       message: "Thêm sản phẩm thành công",
       data: addProduct,
     });
   } catch (e) {
-    res.status(404).json(e.message);
+    return res.status(404).json({
+      status: "error",
+      message: `Thêm sản phẩm thất bại: ${e.message}`,
+      data: [],
+    });
   }
 };
