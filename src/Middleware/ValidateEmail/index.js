@@ -7,10 +7,11 @@ export const ValidateEmail = (req, res, next) => {
       res
         .status(401)
         .json({ status: 0, message: "Không đúng định dạng email" });
+    } else {
+      next();
     }
 
     // Nếu email hợp lệ, chuyển tiếp request đến middleware tiếp theo
-    next();
   } catch (error) {
     console.log(error.message);
     return res.status(401).json({ status: 0, message: "Fail" });
