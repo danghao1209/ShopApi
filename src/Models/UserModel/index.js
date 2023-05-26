@@ -10,6 +10,7 @@ const userSchema = new mongoose.Schema(
     address: { type: String, default: "" },
     cart: { type: String, required: true, unique: true },
     order: { type: String, required: true, unique: true },
+    refreshToken: { type: String, unique: true, default: "" },
   },
   { timestamps: true }
 );

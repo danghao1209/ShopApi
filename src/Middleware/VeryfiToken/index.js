@@ -10,6 +10,6 @@ export function verifyToken(req, res, next) {
     req.dataUser = decoded;
     next();
   } catch (err) {
-    res.status(401).send({ message: "Invalid token" });
+    res.status(403).send({ message: "Invalid token" });
   }
 }

@@ -1,5 +1,10 @@
 {
   "type": "module",
+  "scripts": {
+    "auth": "nodemon authServer",
+    "start": "nodemon index",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
   "start": "node --experimental-specifier-resolution=node src/index",
   "dependencies": {
     "bcryptjs": "^2.4.3",
@@ -12,5 +17,8 @@
     "multer": "^1.4.5-lts.1",
     "shortid": "^2.2.16",
     "validator": "^13.9.0"
+  },
+  "devDependencies": {
+    "nodemon": "^2.0.22"
   }
 }
