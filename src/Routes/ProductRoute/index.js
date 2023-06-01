@@ -5,7 +5,7 @@ import {
   addProduct,
 } from "../../Controllers/ProductController/index.js";
 import { upload } from "../../Controllers/UploadImageController/upload.js";
-import { verifyToken } from "../../Middleware/VeryfiToken/index.js";
+import { verifyAccessToken } from "../../Middleware/VeryfiToken/index.js";
 
 const productRoute = express.Router();
 
@@ -13,7 +13,7 @@ productRoute.get("/all", getAllProduct);
 productRoute.get("/:id", getProduct);
 productRoute.post(
   "/add",
-  verifyToken,
+  verifyAccessToken,
   upload.fields([
     { name: "thumbnail", maxCount: 8 },
     { name: "images", maxCount: 8 },

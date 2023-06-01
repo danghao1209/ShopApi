@@ -1,10 +1,10 @@
 import express from "express";
 
 import { userInfo } from "../../Controllers/UserInfoController/index.js";
-import { verifyToken } from "../../Middleware/VeryfiToken/index.js";
+import { verifyAccessToken } from "../../Middleware/VeryfiToken/index.js";
 
 const userInfoRoute = express.Router();
 
-userInfoRoute.post("/", verifyToken, userInfo);
+userInfoRoute.post("/", verifyAccessToken, userInfo);
 
 export default userInfoRoute;
