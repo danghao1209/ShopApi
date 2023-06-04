@@ -8,8 +8,8 @@ const userSchema = new mongoose.Schema(
     phone: { type: String, required: true, unique: true },
     email: { type: String, required: true, unique: true },
     address: { type: String, default: "" },
-    cart: { type: String, required: true, unique: true },
-    order: { type: String, required: true, unique: true },
+    cartId: { type: String, required: true, unique: true },
+    ordersId: [{ type: String, required: true, unique: true }],
     refreshToken: { type: String, unique: true, default: "" },
   },
   { timestamps: true }

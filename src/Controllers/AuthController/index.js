@@ -14,7 +14,7 @@ export const accessTokenNew = async (req, res) => {
     return res.status(200).json({
       status: 1,
       message: "Get token access",
-      userId: user.id,
+      userId: id,
       tokenACCESS: tokenACCESS,
     });
   } catch (error) {

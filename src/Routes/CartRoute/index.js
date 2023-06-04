@@ -4,12 +4,12 @@ import {
   increaseCart,
   deleteCart,
 } from "../../Controllers/CartController/index.js";
-import { verifyToken } from "../../Middleware/VeryfiToken/index.js";
+import { verifyAccessToken } from "../../Middleware/VeryfiToken/index.js";
 
 const cartRoute = express.Router();
 
-cartRoute.post("/", verifyToken, addCart);
-cartRoute.delete("/", verifyToken, deleteCart);
-cartRoute.put("/", verifyToken, increaseCart);
+cartRoute.post("/", verifyAccessToken, addCart);
+cartRoute.delete("/", verifyAccessToken, deleteCart);
+cartRoute.put("/", verifyAccessToken, increaseCart);
 
 export default cartRoute;

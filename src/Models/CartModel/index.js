@@ -12,7 +12,7 @@ const cartSchema = new mongoose.Schema(
         image: { type: String, required: true },
       },
     ],
-    total: { type: Number, required: true, default: 0, min: 0 },
+    totalQuanlity: { type: Number, required: true, default: 0, min: 0 },
   },
   { timestamps: true }
 );
