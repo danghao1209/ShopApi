@@ -4,17 +4,19 @@ import jwt from "jsonwebtoken";
 
 export const loginUser = async (req, res) => {
   try {
-    const { email, password, ...other } = req.body;
+    const { email, password } = req.body;
     const user = await User.findOne({ email });
+    if (!user) {
+      throw new Error("Không có user");
+    }
     const isMatch = bcrypt.compareSync(password, user.password);
-
     if (!isMatch) {
       return res
         .status(401)
         .json({ status: "0", message: "Sai tên đăng nhập hoặc mật khẩu" });
     } else {
       const payload = {
-        id: user.id,
+        _id: user._id,
       };
       const expiresIn = 365 * 24 * 60 * 60 * 1000;
 
@@ -31,7 +33,7 @@ export const loginUser = async (req, res) => {
       );
 
       const updatedUser = await User.findOneAndUpdate(
-        { id: user.id },
+        { _id: user._id },
         { refreshToken: tokenREFRESH },
         { new: true }
       ).exec();
@@ -39,7 +41,7 @@ export const loginUser = async (req, res) => {
       return res.status(200).json({
         status: 1,
         message: "Đăng nhập thành công",
-        userId: user.id,
+        userId: user._id,
         tokenREFRESH: updatedUser.refreshToken,
         tokenACCESS: tokenACCESS,
       });

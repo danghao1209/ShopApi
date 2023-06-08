@@ -6,8 +6,9 @@ import Cart from "../../Models/CartModel/index.js";
 import Orders from "../../Models/OrdersModel/index.js";
 import Product from "../../Models/ProductModel/index.js";
 
-const ordersQueue = new Queue({ concurrency: 1, autostart: true });
-
+const ordersQueue = new Queue();
+ordersQueue.autostart = true;
+ordersQueue.concurrency = 1;
 async function performTask(userId, ordersId, cartId, carts) {
   try {
     console.log("Đang thực hiện tác vụ");
@@ -83,8 +84,11 @@ export const orderPayment = async (req, res) => {
   }
 };
 
-ordersQueue.on("end", () => {
-  if (ordersQueue.length > 0) {
-    ordersQueue.start();
-  }
-});
+try {
+  ordersQueue.start((err) => {
+    if (err) throw err;
+    console.log("all done:", ordersQueue.results);
+  });
+} catch (error) {
+  console.log(error.message);
+}

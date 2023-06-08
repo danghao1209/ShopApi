@@ -10,7 +10,7 @@ import {
 
 const authRoute = express.Router();
 
-cartRoute.post("/token", verifyRefreshToken, accessTokenNew);
-cartRoute.delete("/", verifyAccessToken, deleteToken);
+authRoute.post("/token", verifyRefreshToken, accessTokenNew);
+authRoute.delete("/", verifyAccessToken, deleteToken);
 
 export default authRoute;

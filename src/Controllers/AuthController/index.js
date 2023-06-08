@@ -1,3 +1,5 @@
+import jwt from "jsonwebtoken";
+
 import User from "../../Models/UserModel/index.js";
 
 export const accessTokenNew = async (req, res) => {

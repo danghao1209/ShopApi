@@ -2,7 +2,10 @@ import mongoose from "mongoose";
 
 const orderSchema = new mongoose.Schema(
   {
-    id: { type: String, required: true },
+    _id: {
+      type: mongoose.Schema.Types.ObjectId,
+      default: mongoose.Types.ObjectId,
+    },
     dataOrder: [
       {
         id: { type: String, required: true }, //id san pham

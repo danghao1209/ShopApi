@@ -26,7 +26,7 @@ export const getProduct = async (req, res, next) => {
       return res.status(200).json(result);
     } else {
       return res.status(404).json({
-        id: null,
+        _id: null,
         title: null,
         description: [],
         price: null,
@@ -41,7 +41,7 @@ export const getProduct = async (req, res, next) => {
     }
   } catch (e) {
     return res.status(404).json({
-      id: null,
+      _id: null,
       title: null,
       description: [],
       price: null,
@@ -90,7 +90,6 @@ export const addProduct = async (req, res, next) => {
     });
 
     const addProduct = new Product({
-      id: shortid.generate(),
       title: req.body.title,
       description: req.body.description,
       price: req.body.price,

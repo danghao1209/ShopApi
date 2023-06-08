@@ -1,28 +1,32 @@
-import shortid from "shortid";
+import mongoose from "mongoose";
+const { ObjectId } = mongoose.Types;
 import User from "../../Models/UserModel/index.js";
 import Cart from "../../Models/CartModel/index.js";
 
 export const registerUser = async (req, res) => {
   try {
-    const { email, password, name, phone, ...pre } = req.body;
+    const { email, password, name, phone } = req.body;
     const isHaveUserEmail = await User.findOne({ email });
     const isHaveUserPhone = await User.findOne({ phone });
 
     if (!!name) {
       if (!isHaveUserEmail && !isHaveUserPhone) {
         const newCart = new Cart({
-          id: shortid.generate(),
+          _id: ObjectId(), // Tạo một ObjectId mới
           carts: [],
-          total: 0,
+          totalQuanlity: 0,
         });
 
         const newUser = new User({
-          id: shortid.generate(),
+          _id: ObjectId(), // Tạo một ObjectId mới
           name: name,
           password: password,
           phone: phone,
           email: email,
-          cart: newCart.id,
+          address: {},
+          cartId: newCart._id,
+          ordersId: [],
+          refreshToken: "",
         });
 
         await Promise.all([newUser.save(), newCart.save()]);
@@ -47,6 +51,7 @@ export const registerUser = async (req, res) => {
         .json({ status: 0, message: "Chưa điền đầy đủ thông tin" });
     }
   } catch (error) {
+    console.log(error.message);
     res.status(401).json({ status: 0, message: "Đăng kí thất bại" });
   }
 };

@@ -1,13 +1,27 @@
 import User from "../../Models/UserModel/index.js";
 import Cart from "../../Models/CartModel/index.js";
 
-export const addCart = async (req, res) => {
+export const getCart = async (req, res) => {
   try {
     const { id } = req.dataUser;
-    const { idProduct, color, size, image } = req.body;
     const { cartId } = await User.findOne({ id });
     const { carts } = await Cart.findOne({ id: cartId });
 
+    res.status(200).json({ status: 1, data: carts });
+  } catch (error) {
+    console.log(error.message);
+    res.status(401).json({ status: 0, message: "Đăng nhập thất bại" });
+  }
+};
+
+export const addCart = async (req, res) => {
+  try {
+    const { id } = req.dataUser;
+    const { idProduct, color, size } = req.body;
+    const { cartId } = await User.findOne({ id });
+
+    const { carts } = await Cart.findOne({ id: cartId });
+    console.log(cartId);
     const indexPro = carts.findIndex((item) => item.id === idProduct);
     let cartsCopy = [...carts];
 
@@ -19,7 +33,6 @@ export const addCart = async (req, res) => {
         quantity: 1,
         color: color,
         size: size,
-        image: image,
       });
     }
 

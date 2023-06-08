@@ -2,14 +2,17 @@ import mongoose from "mongoose";
 import bcrypt from "bcryptjs";
 const userSchema = new mongoose.Schema(
   {
-    id: { type: String, required: true, unique: true },
+    _id: {
+      type: mongoose.Schema.Types.ObjectId,
+      default: mongoose.Types.ObjectId,
+    },
     name: { type: String, required: true },
     password: { type: String, required: true },
     phone: { type: String, required: true, unique: true },
     email: { type: String, required: true, unique: true },
-    address: { type: String, default: "" },
+    address: { type: Object, default: {} },
     cartId: { type: String, required: true, unique: true },
-    ordersId: [{ type: String, required: true, unique: true }],
+    ordersId: [{ type: String, required: true }],
     refreshToken: { type: String, unique: true, default: "" },
   },
   { timestamps: true }
