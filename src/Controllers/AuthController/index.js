@@ -4,10 +4,10 @@ import User from "../../Models/UserModel/index.js";
 
 export const accessTokenNew = async (req, res) => {
   try {
-    const { id } = req.dataUser;
+    const { _id } = req.dataUser;
 
     const payload = {
-      id: id,
+      _id: _id,
     };
 
     const tokenACCESS = jwt.sign(payload, process.env.JWT_SECRET_ACCESS_TOKEN, {
@@ -16,7 +16,7 @@ export const accessTokenNew = async (req, res) => {
     return res.status(200).json({
       status: 1,
       message: "Get token access",
-      userId: id,
+      userId: _id,
       tokenACCESS: tokenACCESS,
     });
   } catch (error) {
@@ -27,10 +27,10 @@ export const accessTokenNew = async (req, res) => {
 
 export const deleteToken = async (req, res) => {
   try {
-    const { id } = req.dataUser;
+    const { _id } = req.dataUser;
 
     await User.findOneAndUpdate(
-      { id: id },
+      { _id: _id },
       { refreshToken: null },
       { new: false }
     ).exec();

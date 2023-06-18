@@ -4,7 +4,7 @@ const orderSchema = new mongoose.Schema(
   {
     _id: {
       type: mongoose.Schema.Types.ObjectId,
-      default: mongoose.Types.ObjectId,
+      default: () => new mongoose.Types.ObjectId(),
     },
     dataOrder: [
       {
@@ -17,6 +17,7 @@ const orderSchema = new mongoose.Schema(
       },
     ],
     totalPrice: { type: Number, required: true, default: 0, min: 0 },
+    lastPrice: { type: Number, required: true, default: 0, min: 0 },
     status: [{ type: String, default: "Đang xác nhận" }],
   },
   { timestamps: true }

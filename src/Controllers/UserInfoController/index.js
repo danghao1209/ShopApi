@@ -2,8 +2,8 @@ import User from "../../Models/UserModel/index.js";
 
 export const userInfo = async (req, res) => {
   try {
-    let { id } = req.dataUser;
-    const resultFind = await User.findOne({ id });
+    let { _id } = req.dataUser;
+    const resultFind = await User.findOne({ _id });
     if (resultFind) {
       const { name, email } = resultFind;
       return res.status(200).json({ status: 1, data: { name, email } });
@@ -18,8 +18,8 @@ export const userInfo = async (req, res) => {
 
 export const ordersInfo = async (req, res) => {
   try {
-    let { id } = req.dataUser;
-    const resultFind = await User.findOne({ id });
+    let { _id } = req.dataUser;
+    const resultFind = await User.findOne({ _id });
     if (resultFind) {
       const { ordersId } = resultFind;
       return res.status(200).json({ status: 1, data: { ordersId } });
@@ -34,8 +34,8 @@ export const ordersInfo = async (req, res) => {
 
 export const addressInfo = async (req, res) => {
   try {
-    let { id } = req.dataUser;
-    const resultFind = await User.findOne({ id });
+    let { _id } = req.dataUser;
+    const resultFind = await User.findOne({ _id });
     if (resultFind) {
       const { phone, address } = resultFind;
       return res.status(200).json({ status: 1, data: { phone, address } });

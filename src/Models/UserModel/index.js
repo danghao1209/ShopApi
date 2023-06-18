@@ -4,7 +4,7 @@ const userSchema = new mongoose.Schema(
   {
     _id: {
       type: mongoose.Schema.Types.ObjectId,
-      default: mongoose.Types.ObjectId,
+      default: () => new mongoose.Types.ObjectId(),
     },
     name: { type: String, required: true },
     password: { type: String, required: true },
@@ -13,7 +13,7 @@ const userSchema = new mongoose.Schema(
     address: { type: Object, default: {} },
     cartId: { type: String, required: true, unique: true },
     ordersId: [{ type: String, required: true }],
-    refreshToken: { type: String, unique: true, default: "" },
+    refreshToken: { type: String, unique: true, sparse: true },
   },
   { timestamps: true }
 );

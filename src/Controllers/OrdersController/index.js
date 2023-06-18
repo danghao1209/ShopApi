@@ -1,4 +1,3 @@
-import shortid from "shortid";
 import Queue from "queue";
 
 import User from "../../Models/UserModel/index.js";
@@ -13,26 +12,31 @@ async function performTask(userId, ordersId, cartId, carts) {
   try {
     console.log("Đang thực hiện tác vụ");
 
-    let listIdProductInCart = carts.map((item) => item.id);
+    let listIdProductInCart = carts.map((item) => item._id);
 
     let listPrice = await Product.find({ id: { $in: listIdProductInCart } });
 
-    let totalPrice = listPrice.reduce((total, cur) => total + cur, 0);
+    let totalPrice = listPrice.reduce((total, cur) => total + cur.price, 0);
+
+    let lastPrice = listPrice.reduce(
+      (total, cur) => total + cur.price - cur.price * discountPercentage,
+      0
+    );
 
     const newOrders = new Orders({
-      id: shortid.generate(),
       orders: carts,
       totalPrice: totalPrice,
+      lastPrice: lastPrice,
       status: "Chờ xác nhận",
     });
 
     const updateCart = Cart.findOneAndUpdate(
-      { id: cartId },
+      { _id: cartId },
       { carts: [], total: 0 },
       { new: true }
     );
     const updateUser = User.findOneAndUpdate(
-      { id: userId },
+      { _id: userId },
       { ordersId: [...ordersId, newOrders.id], total: 0 },
       { new: true }
     );
@@ -55,24 +59,28 @@ async function addToQueue(userId, ordersId, cartId, carts) {
       } catch (error) {
         reject(error);
       }
-      callback();
+      callback(); // Gọi callback() sau khi tác vụ hoàn thành
     });
   });
 }
 
 export const orderPayment = async (req, res) => {
   try {
-    const { id } = req.dataUser;
+    const { _id } = req.dataUser;
     const { cartId, ordersId } = await User.findOne({ id });
-    const { carts } = await Cart.findOne({ id: cartId });
+    const { carts } = await Cart.findOne({ _id: cartId });
 
-    await addToQueue(id, ordersId, cartId, carts);
+    await addToQueue(_id, ordersId, cartId, carts);
 
     res.status(200).json({
       status: 1,
       message: "Mua hàng thành công",
       data: carts,
       total: carts.reduce((total, cur) => total + cur.price, 0),
+      lastPrice: carts.reduce(
+        (total, cur) => total + cur.price - cur.price * discountPercentage,
+        0
+      ),
       orderStatus: "Chờ xác nhận",
     });
   } catch (error) {
@@ -83,12 +91,3 @@ export const orderPayment = async (req, res) => {
     });
   }
 };
-
-try {
-  ordersQueue.start((err) => {
-    if (err) throw err;
-    console.log("all done:", ordersQueue.results);
-  });
-} catch (error) {
-  console.log(error.message);
-}

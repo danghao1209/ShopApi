@@ -143,7 +143,8 @@ const validatePhone = (phoneNumber) => {
 export const ValidatePhone = (req, res, next) => {
   try {
     const { phone } = req.body;
-    if (phone.length !== 10 && !validatePhone(phone).isValidate) {
+    console.log(phone);
+    if (phone?.length !== 10 && !validatePhone(phone).isValidate) {
       res
         .status(401)
         .json({ status: 0, message: "Không đúng định dạng số điện thoại" });

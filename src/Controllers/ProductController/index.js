@@ -21,7 +21,8 @@ export const getAllProduct = async (req, res, next) => {
 
 export const getProduct = async (req, res, next) => {
   try {
-    let result = await Product.findOne({ id: req.params.id });
+    console.log(req.params.id);
+    let result = await Product.findOne({ _id: req.params.id });
     if (result) {
       return res.status(200).json(result);
     } else {

@@ -12,6 +12,7 @@ import userRegisterRoute from "./src/Routes/RegisterRoute/index.js";
 import userInfoRoute from "./src/Routes/UserInfoRoute/index.js";
 import ordersRoute from "./src/Routes/OrdersRouter/index.js";
 import cartRoute from "./src/Routes/CartRoute/index.js";
+import searchRoute from "./src/Routes/SearchRoute/index.js";
 
 dotenv.config();
 
@@ -46,6 +47,7 @@ app.use("/api/register/", userRegisterRoute);
 app.use("/api/info/", userInfoRoute);
 app.use("/api/payment/", ordersRoute);
 app.use("/api/cart/", cartRoute);
+app.use("/api/search/", searchRoute);
 
 app.use("/public/imgs/", imagesRoute);
 

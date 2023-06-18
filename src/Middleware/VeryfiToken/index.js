@@ -23,7 +23,7 @@ export async function verifyRefreshToken(req, res, next) {
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET_REFRESH_TOKEN);
     req.dataUser = decoded;
-    const data = await User.findOne({ id: req.dataUser.id });
+    const data = await User.findOne({ _id: req.dataUser?._id });
     if (data.refreshToken === token) {
       next();
     } else {

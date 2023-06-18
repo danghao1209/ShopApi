@@ -4,7 +4,7 @@ const cartSchema = new mongoose.Schema(
   {
     _id: {
       type: mongoose.Schema.Types.ObjectId,
-      default: mongoose.Types.ObjectId,
+      default: () => new mongoose.Types.ObjectId(),
     },
     carts: [
       {
@@ -19,6 +19,6 @@ const cartSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-var Cart = mongoose.model("Carts", cartSchema, "carts");
+var Cart = mongoose.model("Cart", cartSchema, "cart");
 
 export default Cart;

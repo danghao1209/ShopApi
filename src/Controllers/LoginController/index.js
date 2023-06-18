@@ -5,7 +5,7 @@ import jwt from "jsonwebtoken";
 export const loginUser = async (req, res) => {
   try {
     const { email, password } = req.body;
-    const user = await User.findOne({ email });
+    const user = await User.findOne({ email: email.toLowerCase() });
     if (!user) {
       throw new Error("Không có user");
     }

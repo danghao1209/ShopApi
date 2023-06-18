@@ -12,17 +12,15 @@ export const registerUser = async (req, res) => {
     if (!!name) {
       if (!isHaveUserEmail && !isHaveUserPhone) {
         const newCart = new Cart({
-          _id: ObjectId(), // Tạo một ObjectId mới
           carts: [],
           totalQuanlity: 0,
         });
 
         const newUser = new User({
-          _id: ObjectId(), // Tạo một ObjectId mới
           name: name,
           password: password,
           phone: phone,
-          email: email,
+          email: email.toLowerCase(),
           address: {},
           cartId: newCart._id,
           ordersId: [],
