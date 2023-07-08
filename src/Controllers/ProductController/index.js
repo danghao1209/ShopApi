@@ -1,3 +1,4 @@
+import _ from "lodash";
 import shortid from "shortid";
 import fs from "fs";
 
@@ -115,5 +116,25 @@ export const addProduct = async (req, res, next) => {
       message: `Thêm sản phẩm thất bại: ${e.message}`,
       data: [],
     });
+  }
+};
+
+export const searchPro = async (req, res, next) => {
+  try {
+    const { valueSearch } = req.body;
+    const keyword = valueSearch.replace(/\s+/g, " ").trim();
+    if (keyword?.length > 0) {
+      const regexKeyword = new RegExp(keyword, "i");
+      const products = await Product.find({ title: { $regex: regexKeyword } });
+
+      // Xử lý kết quả trả về, ví dụ: gửi kết quả về cho client
+      res.status(200).json({ data: products });
+    } else {
+      throw new Error("Không có keyword");
+    }
+  } catch (error) {
+    // Xử lý lỗi
+    //next(error);
+    res.status(400).json({ error: error.message });
   }
 };

@@ -6,9 +6,7 @@ import rateLimit from "express-rate-limit";
 import cors from "cors";
 
 import productRoute from "./src/Routes/ProductRoute/index.js";
-import loginRoute from "./src/Routes/LoginRoute/index.js";
 import imagesRoute from "./src/Routes/ImagesRoute/index.js";
-import userRegisterRoute from "./src/Routes/RegisterRoute/index.js";
 import userInfoRoute from "./src/Routes/UserInfoRoute/index.js";
 import ordersRoute from "./src/Routes/OrdersRouter/index.js";
 import cartRoute from "./src/Routes/CartRoute/index.js";
@@ -41,9 +39,7 @@ app.use(express.static(`public`));
 app.use(cors());
 app.use(apiLimiter);
 
-app.use("/api/login", loginRoute);
 app.use("/api/product/", productRoute);
-app.use("/api/register/", userRegisterRoute);
 app.use("/api/info/", userInfoRoute);
 app.use("/api/payment/", ordersRoute);
 app.use("/api/cart/", cartRoute);

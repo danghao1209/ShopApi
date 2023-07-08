@@ -17,6 +17,7 @@ export function verifyAccessToken(req, res, next) {
 
 export async function verifyRefreshToken(req, res, next) {
   const token = req.headers["refresh-token"];
+
   if (!token) {
     return res.status(401).send({ message: "Token not provided" });
   }

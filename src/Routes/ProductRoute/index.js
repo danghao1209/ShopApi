@@ -3,6 +3,7 @@ import {
   getAllProduct,
   getProduct,
   addProduct,
+  searchPro,
 } from "../../Controllers/ProductController/index.js";
 import { upload } from "../../Controllers/UploadImageController/upload.js";
 import { verifyAccessToken } from "../../Middleware/VeryfiToken/index.js";
@@ -20,5 +21,6 @@ productRoute.post(
   ]),
   addProduct
 );
+productRoute.post("/search", searchPro);
 
 export default productRoute;
