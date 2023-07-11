@@ -4,18 +4,24 @@ import User from "../../Models/UserModel/index.js";
 import Cart from "../../Models/CartModel/index.js";
 import Product from "../../Models/ProductModel/index.js";
 
-export const getCart = async (req, res) => {
+export const getCart = async (req, res, next) => {
   try {
     const { _id } = req.dataUser;
     const { cartId } = await User.findOne({ _id });
+
     const carts = await Cart.findOne({ _id: cartId });
+    if (!carts) {
+      throw new Error("Không tìm thấy giỏ hàng");
+    }
     res.status(200).json({ status: 1, data: carts });
   } catch (error) {
     console.log(error.message);
-    res.status(401).json({ status: 0, message: "Đăng nhập thất bại" });
+    error.message = "Đăng nhập thất bại";
+    next(error);
   }
 };
-export const getDataProInCart = async (req, res) => {
+
+export const getDataProInCart = async (req, res, next) => {
   try {
     const { _id } = req.dataUser;
     const { cartId } = await User.findOne({ _id });
@@ -24,14 +30,18 @@ export const getDataProInCart = async (req, res) => {
     const listProInCart = await Product.find({
       _id: { $in: listIdProInCarts },
     });
+    if (listProInCart.length === 0) {
+      throw new Error("Lấy dữ liệu từ giỏ hàng thất bại");
+    }
     res.status(200).json({ status: 1, data: listProInCart });
   } catch (error) {
     console.log(error.message);
-    res.status(401).json({ status: 0, message: "Đăng nhập thất bại" });
+    error.message = "Đăng nhập thất bại";
+    next(error);
   }
 };
 
-export const addCart = async (req, res) => {
+export const addCart = async (req, res, next) => {
   try {
     const { _id } = req.dataUser;
     const { id, data } = req.body;
@@ -40,9 +50,7 @@ export const addCart = async (req, res) => {
 
       const cart = await Cart.findById(cartId);
       if (!cart) {
-        return res
-          .status(404)
-          .json({ status: 0, message: "Giỏ hàng không tồn tại" });
+        throw new Error("Thêm vào giỏ hàng thất bại");
       }
 
       const { carts } = cart;
@@ -75,12 +83,11 @@ export const addCart = async (req, res) => {
       throw new Error("Không có data trong product");
     }
   } catch (error) {
-    console.log(error.message);
-    res.status(500).json({ status: 0, message: "Đã xảy ra lỗi" });
+    next(error);
   }
 };
 
-export const deleteOneProInCart = async (req, res) => {
+export const deleteOneProInCart = async (req, res, next) => {
   try {
     const { _id } = req.dataUser;
     const { data } = req.body;
@@ -88,9 +95,7 @@ export const deleteOneProInCart = async (req, res) => {
     const { cartId } = await User.findOne({ _id });
     const cart = await Cart.findById(cartId);
     if (!cart) {
-      return res
-        .status(404)
-        .json({ status: 0, message: "Giỏ hàng không tồn tại" });
+      throw new Error("Sản phẩm không tồn tại trong giỏ hàng");
     }
     const { carts } = cart;
     const searchId = new mongoose.Types.ObjectId(data.id);
@@ -113,14 +118,12 @@ export const deleteOneProInCart = async (req, res) => {
     }
   } catch (error) {
     console.log(error.message);
-    return res.status(401).json({
-      status: 1,
-      message: "Không có sản phẩm trong giỏ hàng",
-    });
+    error.message = "Không có sản phẩm trong giỏ hàng";
+    next(error);
   }
 };
 
-export const increaseCart = async (req, res) => {
+export const increaseCart = async (req, res, next) => {
   try {
     const { _id } = req.dataUser;
     const { data } = req.body;
@@ -128,9 +131,7 @@ export const increaseCart = async (req, res) => {
       const { cartId } = await User.findOne({ _id });
       const cart = await Cart.findById(cartId);
       if (!cart) {
-        return res
-          .status(404)
-          .json({ status: 0, message: "Giỏ hàng không tồn tại" });
+        throw new Error("Giỏ hàng không tồn tại");
       }
       const { carts } = cart;
       const searchId = new mongoose.Types.ObjectId(data.id);
@@ -150,11 +151,9 @@ export const increaseCart = async (req, res) => {
         data: foundItem,
       });
     } else {
-      return res
-        .status(400)
-        .json({ status: 1, message: "Số lượng sản phẩm phải từ 1", data: [] });
+      throw new Error("Số lượng sản phẩm phải từ 1");
     }
   } catch (error) {
-    return res.status(422).json({ status: 1, message: "Lỗi", data: [] });
+    next(error);
   }
 };

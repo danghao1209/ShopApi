@@ -3,6 +3,7 @@ import {
   accessTokenNew,
   deleteToken,
 } from "../../Controllers/AuthController/index.js";
+import { handleError } from "../../Controllers/ErrorController/index.js";
 import {
   verifyAccessToken,
   verifyRefreshToken,
@@ -10,7 +11,7 @@ import {
 
 const authRoute = express.Router();
 
-authRoute.post("/token", verifyRefreshToken, accessTokenNew);
-authRoute.delete("/", verifyAccessToken, deleteToken);
+authRoute.post("/token", verifyRefreshToken, accessTokenNew, handleError);
+authRoute.delete("/", verifyAccessToken, deleteToken, handleError);
 
 export default authRoute;

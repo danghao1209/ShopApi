@@ -14,6 +14,7 @@ export const getImages = (req, res) => {
     imageStream.pipe(res);
     res.end();
   } catch (error) {
-    res.status(404).json({ message: error.message });
+    console.log(error);
+    next(error);
   }
 };

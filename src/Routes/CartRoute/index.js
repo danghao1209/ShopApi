@@ -7,13 +7,14 @@ import {
   deleteOneProInCart,
 } from "../../Controllers/CartController/index.js";
 import { verifyAccessToken } from "../../Middleware/VeryfiToken/index.js";
+import { handleError } from "../../Controllers/ErrorController/index.js";
 
 const cartRoute = express.Router();
 
-cartRoute.get("/", verifyAccessToken, getCart);
-cartRoute.get("/data", verifyAccessToken, getDataProInCart);
-cartRoute.post("/", verifyAccessToken, addCart);
-cartRoute.post("/delete", verifyAccessToken, deleteOneProInCart);
-cartRoute.put("/", verifyAccessToken, increaseCart);
+cartRoute.get("/", verifyAccessToken, getCart, handleError);
+cartRoute.get("/data", verifyAccessToken, getDataProInCart, handleError);
+cartRoute.post("/", verifyAccessToken, addCart, handleError);
+cartRoute.post("/delete", verifyAccessToken, deleteOneProInCart, handleError);
+cartRoute.put("/", verifyAccessToken, increaseCart, handleError);
 
 export default cartRoute;

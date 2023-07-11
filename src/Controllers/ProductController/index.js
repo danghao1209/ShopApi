@@ -6,17 +6,18 @@ import Product from "../../Models/ProductModel/index.js";
 
 export const getAllProduct = async (req, res, next) => {
   try {
-    let resultFind = await Product.find({});
-    let resultsALl = {
+    const resultFind = await Product.find({});
+    if (resultFind?.length === 0) {
+      throw new Error("Không lấy được sản phẩm");
+    }
+    const resultsALl = {
       total: resultFind.length,
       products: resultFind,
     };
     return res.status(200).json(resultsALl);
-  } catch (e) {
-    return res.status(404).json({
-      total: 0,
-      products: {},
-    });
+  } catch (error) {
+    console.log(error.message);
+    next(error);
   }
 };
 
@@ -41,20 +42,9 @@ export const getProduct = async (req, res, next) => {
         thumbnail: [],
       });
     }
-  } catch (e) {
-    return res.status(404).json({
-      _id: null,
-      title: null,
-      description: [],
-      price: null,
-      new: null,
-      discountPercentage: null,
-      rating: null,
-      data: [],
-      brand: null,
-      category: null,
-      thumbnail: [],
-    });
+  } catch (error) {
+    console.log(error.message);
+    next(error);
   }
 };
 
@@ -110,12 +100,9 @@ export const addProduct = async (req, res, next) => {
       message: "Thêm sản phẩm thành công",
       data: addProduct,
     });
-  } catch (e) {
-    return res.status(404).json({
-      status: "error",
-      message: `Thêm sản phẩm thất bại: ${e.message}`,
-      data: [],
-    });
+  } catch (error) {
+    console.log(error.message);
+    next(error);
   }
 };
 
@@ -127,14 +114,16 @@ export const searchPro = async (req, res, next) => {
       const regexKeyword = new RegExp(keyword, "i");
       const products = await Product.find({ title: { $regex: regexKeyword } });
 
+      if (products?.length === 0) {
+        throw new Error("Không có sản phẩm trùng hợp");
+      }
       // Xử lý kết quả trả về, ví dụ: gửi kết quả về cho client
       res.status(200).json({ data: products });
     } else {
       throw new Error("Không có keyword");
     }
   } catch (error) {
-    // Xử lý lỗi
-    //next(error);
-    res.status(400).json({ error: error.message });
+    console.log(error);
+    next(error);
   }
 };

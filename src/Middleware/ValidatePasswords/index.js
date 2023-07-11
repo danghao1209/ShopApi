@@ -1,11 +1,12 @@
 function isPasswordValid(password) {
+  if (!password) return false;
   // Kiểm tra xem mật khẩu có chứa khoảng trắng hay không
-  if (password.includes(" ")) {
+  if (password?.includes(" ")) {
     return false;
   }
 
   // Kiểm tra độ dài tối thiểu là 6
-  if (password.length < 6) {
+  if (password?.length < 6) {
     return false;
   }
 
@@ -19,10 +20,7 @@ export const ValidatePass = (req, res, next) => {
   try {
     const { password } = req.body;
     if (!isPasswordValid(password)) {
-      res.status(401).json({
-        status: 0,
-        message: "Mật khẩu phải từ 6 kí tự và không có khoảng trắng",
-      });
+      throw new Error(`Mật khẩu phải từ 6 kí tự và không có khoảng trắng`);
     } else {
       next();
     }
@@ -30,6 +28,6 @@ export const ValidatePass = (req, res, next) => {
     // Nếu email hợp lệ, chuyển tiếp request đến middleware tiếp theo
   } catch (error) {
     console.log(error.message);
-    return res.status(401).json({ status: 0, message: "Fail" });
+    return res.status(401).json({ status: 0, message: error.message });
   }
 };

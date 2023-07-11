@@ -14,12 +14,16 @@ async function performTask(userId, ordersId, cartId, carts) {
 
     let listIdProductInCart = carts.map((item) => item._id);
 
-    let listPrice = await Product.find({ id: { $in: listIdProductInCart } });
+    let listPrice = await Product.find({ _id: { $in: listIdProductInCart } });
+
+    if (listPrice?.length === 0) {
+      throw new Error("Giỏ hàng trống");
+    }
 
     let totalPrice = listPrice.reduce((total, cur) => total + cur.price, 0);
 
     let lastPrice = listPrice.reduce(
-      (total, cur) => total + cur.price - cur.price * discountPercentage,
+      (total, cur) => total + cur.price - cur.price * cur.discountPercentage,
       0
     );
 
@@ -30,12 +34,12 @@ async function performTask(userId, ordersId, cartId, carts) {
       status: "Chờ xác nhận",
     });
 
-    const updateCart = Cart.findOneAndUpdate(
+    const updateCart = await Cart.findOneAndUpdate(
       { _id: cartId },
       { carts: [], total: 0 },
       { new: true }
     );
-    const updateUser = User.findOneAndUpdate(
+    const updateUser = await User.findOneAndUpdate(
       { _id: userId },
       { ordersId: [...ordersId, newOrders.id], total: 0 },
       { new: true }
@@ -64,10 +68,10 @@ async function addToQueue(userId, ordersId, cartId, carts) {
   });
 }
 
-export const orderPayment = async (req, res) => {
+export const orderPayment = async (req, res, next) => {
   try {
     const { _id } = req.dataUser;
-    const { cartId, ordersId } = await User.findOne({ id });
+    const { cartId, ordersId } = await User.findOne({ _id });
     const { carts } = await Cart.findOne({ _id: cartId });
 
     await addToQueue(_id, ordersId, cartId, carts);
@@ -78,16 +82,14 @@ export const orderPayment = async (req, res) => {
       data: carts,
       total: carts.reduce((total, cur) => total + cur.price, 0),
       lastPrice: carts.reduce(
-        (total, cur) => total + cur.price - cur.price * discountPercentage,
+        (total, cur) => total + cur.price - cur.price * cur.discountPercentage,
         0
       ),
       orderStatus: "Chờ xác nhận",
     });
   } catch (error) {
     console.log(error.message);
-    return res.status(401).json({
-      status: 0,
-      message: "Mua hàng thất bại",
-    });
+    error.message = "Mua hàng thất bại";
+    next(error);
   }
 };

@@ -6,8 +6,6 @@ import cors from "cors";
 import rateLimit from "express-rate-limit";
 
 import authRoute from "./src/Routes/AuthRoute/index.js";
-import loginRoute from "./src/Routes/LoginRoute/index.js";
-import userRegisterRoute from "./src/Routes/RegisterRoute/index.js";
 
 dotenv.config();
 
@@ -34,8 +32,6 @@ app.use(express.json());
 app.use(cors());
 
 app.use("/api/auth/", authRoute);
-app.use("/api/login", loginRoute);
-app.use("/api/register", userRegisterRoute);
 
 app.listen(2001, () => {
   console.log("Sever listen");
