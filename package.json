@@ -3,7 +3,8 @@
   "scripts": {
     "auth": "nodemon authServer",
     "start": "nodemon index",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start-both": "concurrently \"node index\" &&\"node authServer\""
   },
   "start": "node --experimental-specifier-resolution=node src/index",
   "dependencies": {

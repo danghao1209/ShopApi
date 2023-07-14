@@ -1,5 +1,5 @@
-import * as dotenv from "dotenv";
 import express from "express";
+import * as dotenv from "dotenv";
 import bodyParser from "body-parser";
 import mongoose from "mongoose";
 import rateLimit from "express-rate-limit";

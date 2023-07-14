@@ -1,6 +1,7 @@
 import _ from "lodash";
 import shortid from "shortid";
 import fs from "fs";
+import mongoose from "mongoose";
 
 import Product from "../../Models/ProductModel/index.js";
 
@@ -24,7 +25,7 @@ export const getAllProduct = async (req, res, next) => {
 export const getProduct = async (req, res, next) => {
   try {
     console.log(req.params.id);
-    let result = await Product.findOne({ _id: req.params.id });
+    const result = await Product.findById(req.params.id);
     if (result) {
       return res.status(200).json(result);
     } else {

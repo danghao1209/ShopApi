@@ -15,6 +15,6 @@ cartRoute.get("/", verifyAccessToken, getCart, handleError);
 cartRoute.get("/data", verifyAccessToken, getDataProInCart, handleError);
 cartRoute.post("/", verifyAccessToken, addCart, handleError);
 cartRoute.post("/delete", verifyAccessToken, deleteOneProInCart, handleError);
-cartRoute.put("/", verifyAccessToken, increaseCart, handleError);
+cartRoute.patch("/", verifyAccessToken, increaseCart, handleError);
 
 export default cartRoute;

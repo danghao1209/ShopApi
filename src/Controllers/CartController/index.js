@@ -13,6 +13,7 @@ export const getCart = async (req, res, next) => {
     if (!carts) {
       throw new Error("Không tìm thấy giỏ hàng");
     }
+    console.log(carts);
     res.status(200).json({ status: 1, data: carts });
   } catch (error) {
     console.log(error.message);
@@ -60,7 +61,7 @@ export const addCart = async (req, res, next) => {
         color: data.color.toString(),
         size: data.size.toString(),
       });
-
+      
       if (foundItem) {
         foundItem.quantity += 1;
       } else {
@@ -145,7 +146,7 @@ export const increaseCart = async (req, res, next) => {
       cart.carts = carts;
       await cart.save();
 
-      return res.status(201).json({
+      return res.status(200).json({
         status: 1,
         message: "Tăng số lượng thành công",
         data: foundItem,

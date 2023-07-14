@@ -4,33 +4,72 @@ import User from "../../Models/UserModel/index.js";
 import Cart from "../../Models/CartModel/index.js";
 import Orders from "../../Models/OrdersModel/index.js";
 import Product from "../../Models/ProductModel/index.js";
+import mongoose from "mongoose";
+import _ from "lodash";
 
 const ordersQueue = new Queue();
 ordersQueue.autostart = true;
 ordersQueue.concurrency = 1;
-async function performTask(userId, ordersId, cartId, carts) {
+async function performTask(userId, ordersId, cartId, carts, data) {
   try {
     console.log("Đang thực hiện tác vụ");
 
-    let listIdProductInCart = carts.map((item) => item._id);
+    const listIdProductInCart = carts.map((item) => item.id);
 
-    let listPrice = await Product.find({ _id: { $in: listIdProductInCart } });
+    const listPrice = await Product.find({ _id: { $in: listIdProductInCart } });
 
     if (listPrice?.length === 0) {
       throw new Error("Giỏ hàng trống");
     }
 
-    let totalPrice = listPrice.reduce((total, cur) => total + cur.price, 0);
+    const totalPrice = _.sumBy(carts, (cartItem) => {
+      const product = _.find(listPrice, {
+        _id: new mongoose.Types.ObjectId(cartItem.id),
+      });
+      if (product) {
+        const discountedPrice = Math.round(
+          product.price * (1 - product.discountPercentage / 100)
+        );
+        return discountedPrice * cartItem.quantity;
+      }
+      return null;
+    });
+    if (!totalPrice) {
+      throw new Error("Lỗi mua hàng vui lòng thử lại");
+    }
+    const updatedCartItems = _.map(carts, (cartItem) => {
+      const matchedProduct = _.find(listPrice, {
+        _id: new mongoose.Types.ObjectId(cartItem.id),
+      });
+      if (matchedProduct) {
+        const plainCartItem = cartItem.toObject(); // Chuyển đổi thành đối tượng JavaScript thông thường
+        return {
+          ...plainCartItem,
+          discountPercentage: matchedProduct.discountPercentage,
+          price: matchedProduct.price,
+          image: matchedProduct.data[cartItem.color].images[0],
+        };
+      }
+      return null;
+    });
+    if (!updatedCartItems) {
+      throw new Error("Lỗi mua hàng vui lòng thử lại");
+    }
 
-    let lastPrice = listPrice.reduce(
-      (total, cur) => total + cur.price - cur.price * cur.discountPercentage,
-      0
-    );
+    const freeShip = totalPrice > 700;
+    const lastPrice = freeShip ? totalPrice : totalPrice + 30;
+
+    const { phone, name, address, tinh, huyen, xa, note } = data;
 
     const newOrders = new Orders({
-      orders: carts,
+      dataOrder: updatedCartItems,
       totalPrice: totalPrice,
       lastPrice: lastPrice,
+      phone: phone,
+      name: name,
+      detailedAddress: { address, tinh, huyen, xa },
+      freeship: freeShip,
+      note: note,
       status: "Chờ xác nhận",
     });
 
@@ -45,7 +84,7 @@ async function performTask(userId, ordersId, cartId, carts) {
       { new: true }
     );
 
-    await Promise.all([newOrders.save(), updateCart.exec(), updateUser.exec()]);
+    await Promise.all([newOrders.save(), updateCart.save(), updateUser.save()]);
 
     console.log(`Mua thành công id đơn: ${newOrders.id}!`);
   } catch (error) {
@@ -54,11 +93,11 @@ async function performTask(userId, ordersId, cartId, carts) {
   }
 }
 
-async function addToQueue(userId, ordersId, cartId, carts) {
+async function addToQueue(userId, ordersId, cartId, carts, data) {
   await new Promise((resolve, reject) => {
     ordersQueue.push(async (callback) => {
       try {
-        await performTask(userId, ordersId, cartId, carts);
+        await performTask(userId, ordersId, cartId, carts, data);
         resolve();
       } catch (error) {
         reject(error);
@@ -71,10 +110,13 @@ async function addToQueue(userId, ordersId, cartId, carts) {
 export const orderPayment = async (req, res, next) => {
   try {
     const { _id } = req.dataUser;
+    const { idCart, data } = req.body;
     const { cartId, ordersId } = await User.findOne({ _id });
+    if (idCart !== cartId) {
+      throw new Error("Không trùng id giỏ hàng");
+    }
     const { carts } = await Cart.findOne({ _id: cartId });
-
-    await addToQueue(_id, ordersId, cartId, carts);
+    await addToQueue(_id, ordersId, cartId, carts, data);
 
     res.status(200).json({
       status: 1,
