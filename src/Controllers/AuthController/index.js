@@ -202,7 +202,7 @@ export const changePassword = async (req, res, next) => {
 // };
 
 const saveOtpToRedis = async (email, otp) => {
-  const existingOtp = await redisClient.get(email);
+  const existingOtp = await redisClient.get(email?.toLowerCase());
   if (existingOtp) {
     // OTP đã tồn tại cho email này, ghi đè OTP mới lên email cũ
     const oldOTP = JSON.parse(existingOtp);
@@ -215,8 +215,12 @@ const saveOtpToRedis = async (email, otp) => {
       otp: otp,
       count: oldOTP.count + 1,
     };
-
-    await redisClient.setWithTime(email, JSON.stringify(newOTP), 5 * 60);
+    const resuult = await redisClient.setWithTime(
+      email,
+      JSON.stringify(newOTP),
+      5 * 60
+    );
+    console.log(resuult);
   } else {
     // OTP chưa tồn tại cho email này, tạo mới OTP và lưu vào cơ sở dữ liệu
     const newOTP = {
@@ -300,15 +304,17 @@ const isOtpValidForEmail = async (email, otp) => {
   if (!otp || !email) {
     return false;
   }
-  const existingOtp = await redisClient.get(email);
+  const existingOtp = await redisClient.get(email?.toLowerCase());
 
   if (!existingOtp) {
+    console.log("không có trùng");
     return false; // Mã OTP không tồn tại trong cơ sở dữ liệu
   }
 
   const otpRedis = JSON.parse(existingOtp);
 
   if (otp !== otpRedis?.otp) {
+    console.log("không khớp");
     return false;
   }
 
