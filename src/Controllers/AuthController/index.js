@@ -202,7 +202,9 @@ export const changePassword = async (req, res, next) => {
 // };
 
 const saveOtpToRedis = async (email, otp) => {
-  const existingOtp = await redisClient.get(email?.toLowerCase());
+  const existingOtp = await redisClient.get(
+    JSON.stringify(email).toLowerCase()
+  );
   console.log(existingOtp);
   if (existingOtp) {
     // OTP đã tồn tại cho email này, ghi đè OTP mới lên email cũ
@@ -217,7 +219,7 @@ const saveOtpToRedis = async (email, otp) => {
       count: oldOTP.count + 1,
     };
     await redisClient.setWithTime(
-      email?.toLowerCase(),
+      JSON.stringify(email).toLowerCase(),
       JSON.stringify(newOTP),
       5 * 60
     );
@@ -228,7 +230,7 @@ const saveOtpToRedis = async (email, otp) => {
       count: 1,
     };
     await redisClient.setWithTime(
-      email?.toLowerCase(),
+      JSON.stringify(email).toLowerCase(),
       JSON.stringify(newOTP),
       5 * 60
     );
@@ -305,28 +307,34 @@ export const sendOtp = async (req, res, next) => {
 
 //confirm otp
 const isOtpValidForEmail = async (email, otp) => {
-  if (!otp || !email) {
-    return false;
+  try {
+    if (!otp || !email) {
+      return false;
+    }
+    const existingOtp = await redisClient.get(
+      JSON.stringify(email).toLowerCase()
+    );
+
+    if (!existingOtp) {
+      console.log("không có trùng");
+      return false; // Mã OTP không tồn tại trong cơ sở dữ liệu
+    }
+
+    const otpRedis = JSON.parse(existingOtp);
+
+    if (otp !== otpRedis?.otp) {
+      console.log("không khớp");
+      return false;
+    }
+
+    return true; // Mã OTP hợp lệ
+  } catch (error) {
+    throw new Error(error);
   }
-  const existingOtp = await redisClient.get(email?.toLowerCase());
-
-  if (!existingOtp) {
-    console.log("không có trùng");
-    return false; // Mã OTP không tồn tại trong cơ sở dữ liệu
-  }
-
-  const otpRedis = JSON.parse(existingOtp);
-
-  if (otp !== otpRedis?.otp) {
-    console.log("không khớp");
-    return false;
-  }
-
-  return true; // Mã OTP hợp lệ
 };
 
 const deleteOtp = async (email) => {
-  await redisClient.deleteKey(email);
+  await redisClient.deleteKey(JSON.stringify(email).toLowerCase());
 };
 
 export const submitOtp = async (req, res, next) => {
@@ -336,7 +344,7 @@ export const submitOtp = async (req, res, next) => {
     if (!isOtpValid) {
       throw new Error(`OTP không đúng vui lòng thử lại`);
     }
-    await deleteOtp(email);
+    await deleteOtp(JSON.stringify(email).toLowerCase());
     const tokenValidateOtp = jwt.sign(
       { email },
       process.env.JWT_SECRET_OTP_TOKEN,
