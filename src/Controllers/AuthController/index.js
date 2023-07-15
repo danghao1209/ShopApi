@@ -202,34 +202,36 @@ export const changePassword = async (req, res, next) => {
 // };
 
 const saveOtpToRedis = async (email, otp) => {
-  const existingOtp = await redisClient.get(email?.toLowerCase());
-  if (existingOtp) {
-    // OTP đã tồn tại cho email này, ghi đè OTP mới lên email cũ
-    const oldOTP = JSON.parse(existingOtp);
-    if (oldOTP?.count > 5) {
-      throw new Error(
-        `Bạn đã gửi OTP quá nhiều lần vui lòng thử lại sau 5 phút`
+  try {
+    const existingOtp = await redisClient.get(email?.toLowerCase());
+    if (existingOtp) {
+      // OTP đã tồn tại cho email này, ghi đè OTP mới lên email cũ
+      const oldOTP = JSON.parse(existingOtp);
+      if (oldOTP?.count > 5) {
+        throw new Error(
+          `Bạn đã gửi OTP quá nhiều lần vui lòng thử lại sau 5 phút`
+        );
+      }
+      const newOTP = {
+        otp: otp,
+        count: oldOTP.count + 1,
+      };
+      const resuult = await redisClient.setWithTime(
+        email,
+        JSON.stringify(newOTP),
+        5 * 60
       );
-    }
-    const newOTP = {
-      otp: otp,
-      count: oldOTP.count + 1,
-    };
-    const resuult = await redisClient.setWithTime(
-      email,
-      JSON.stringify(newOTP),
-      5 * 60
-    );
-    console.log(newOTP, 0);
-  } else {
-    // OTP chưa tồn tại cho email này, tạo mới OTP và lưu vào cơ sở dữ liệu
-    const newOTP = {
-      otp: otp,
-      count: 1,
-    };
-    console.log(newOTP, 1);
+    } else {
+      // OTP chưa tồn tại cho email này, tạo mới OTP và lưu vào cơ sở dữ liệu
+      const newOTP = {
+        otp: otp,
+        count: 1,
+      };
 
-    await redisClient.setWithTime(email, JSON.stringify(newOTP), 5 * 60);
+      await redisClient.setWithTime(email, JSON.stringify(newOTP), 5 * 60);
+    }
+  } catch (error) {
+    console.log(error.message);
   }
 };
 
