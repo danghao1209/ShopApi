@@ -220,13 +220,15 @@ const saveOtpToRedis = async (email, otp) => {
       JSON.stringify(newOTP),
       5 * 60
     );
-    console.log(resuult);
+    console.log(newOTP, 0);
   } else {
     // OTP chưa tồn tại cho email này, tạo mới OTP và lưu vào cơ sở dữ liệu
     const newOTP = {
       otp: otp,
       count: 1,
     };
+    console.log(newOTP, 1);
+
     await redisClient.setWithTime(email, JSON.stringify(newOTP), 5 * 60);
   }
 };
