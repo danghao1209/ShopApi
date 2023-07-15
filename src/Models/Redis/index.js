@@ -13,7 +13,7 @@ class RedisClient {
     return await this.redis.set(key, value);
   }
   async setWithTime(key, value, time) {
-    return await this.redis.psetex(key, time, value);
+    return await this.redis.set(key, time, value);
   }
   async deleteKey(key) {
     return await this.redis.del(key);
