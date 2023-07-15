@@ -27,7 +27,8 @@ authRoute.post(
   ValidatePhone,
   ValidateEmail,
   ValidatePass,
-  registerUser
+  registerUser,
+  handleError
 );
 authRoute.post("/otp-forgot-password", sendOtp, handleError);
 authRoute.post("/submit-otp", ValidateEmail, submitOtp, handleError);

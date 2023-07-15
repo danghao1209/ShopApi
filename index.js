@@ -1,5 +1,5 @@
-import express from "express";
 import * as dotenv from "dotenv";
+import express from "express";
 import bodyParser from "body-parser";
 import mongoose from "mongoose";
 import rateLimit from "express-rate-limit";
@@ -11,6 +11,8 @@ import userInfoRoute from "./src/Routes/UserInfoRoute/index.js";
 import ordersRoute from "./src/Routes/OrdersRouter/index.js";
 import cartRoute from "./src/Routes/CartRoute/index.js";
 import searchRoute from "./src/Routes/SearchRoute/index.js";
+
+import authRoute from "./src/Routes/AuthRoute/index.js";
 
 dotenv.config();
 
@@ -46,6 +48,8 @@ app.use("/api/cart/", cartRoute);
 app.use("/api/search/", searchRoute);
 
 app.use("/api/public/imgs/", imagesRoute);
+
+app.use("/auth/", authRoute);
 
 app.listen(1209, () => {
   console.log("Sever listen");
