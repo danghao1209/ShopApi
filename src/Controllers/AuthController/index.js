@@ -4,7 +4,7 @@ import nodemailer from "nodemailer";
 import User from "../../Models/UserModel/index.js";
 import Cart from "../../Models/CartModel/index.js";
 import Otp from "../../Models/OtpModel/index.js";
-import redisClient from "../../Models/RedisClientModel/index.js";
+import { redisClient } from "../../Models/Redis/index.js";
 
 export const accessTokenNew = async (req, res, next) => {
   try {
