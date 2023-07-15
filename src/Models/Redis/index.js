@@ -14,6 +14,7 @@ class RedisClient {
   }
   async setWithTime(key, value, time) {
     const timeInMilliseconds = parseInt(time, 10);
+    console.log(timeInMilliseconds);
     if (isNaN(timeInMilliseconds) || timeInMilliseconds < 0) {
       throw new Error("Invalid time value");
     }
