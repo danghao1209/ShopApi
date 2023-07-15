@@ -31,7 +31,7 @@ app.use(apiAuthLimiter);
 app.use(express.json());
 app.use(cors());
 
-app.use("/api/auth/", authRoute);
+app.use("/auth/", authRoute);
 
 app.listen(2001, () => {
   console.log("Sever listen");

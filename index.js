@@ -39,11 +39,11 @@ app.use(express.static(`public`));
 app.use(cors());
 app.use(apiLimiter);
 
-app.use("/api/product/", productRoute);
-app.use("/api/info/", userInfoRoute);
-app.use("/api/payment/", ordersRoute);
-app.use("/api/cart/", cartRoute);
-app.use("/api/search/", searchRoute);
+app.use("/product/", productRoute);
+app.use("/info/", userInfoRoute);
+app.use("/payment/", ordersRoute);
+app.use("/cart/", cartRoute);
+app.use("/search/", searchRoute);
 
 app.use("/public/imgs/", imagesRoute);
 
