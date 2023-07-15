@@ -1,11 +1,12 @@
+import _ from "lodash";
+import mongoose from "mongoose";
 import Queue from "queue";
+import { redisClient } from "../../Models/Redis/index.js";
 
 import User from "../../Models/UserModel/index.js";
 import Cart from "../../Models/CartModel/index.js";
 import Orders from "../../Models/OrdersModel/index.js";
 import Product from "../../Models/ProductModel/index.js";
-import mongoose from "mongoose";
-import _ from "lodash";
 
 const ordersQueue = new Queue();
 ordersQueue.autostart = true;
@@ -75,12 +76,12 @@ async function performTask(userId, ordersId, cartId, carts, data) {
 
     const updateCart = await Cart.findOneAndUpdate(
       { _id: cartId },
-      { carts: [], total: 0 },
+      { carts: [], totalQuanlity: 0 },
       { new: true }
     );
     const updateUser = await User.findOneAndUpdate(
       { _id: userId },
-      { ordersId: [...ordersId, newOrders.id], total: 0 },
+      { ordersId: [...ordersId, newOrders.id] },
       { new: true }
     );
 
@@ -117,7 +118,7 @@ export const orderPayment = async (req, res, next) => {
     }
     const { carts } = await Cart.findOne({ _id: cartId });
     await addToQueue(_id, ordersId, cartId, carts, data);
-
+    await redisClient.deleteKey("allproducts");
     res.status(200).json({
       status: 1,
       message: "Mua hàng thành công",

@@ -1,21 +1,34 @@
 import _ from "lodash";
 import shortid from "shortid";
 import fs from "fs";
-import mongoose from "mongoose";
-
+import { redisClient } from "../../Models/Redis/index.js";
 import Product from "../../Models/ProductModel/index.js";
 
 export const getAllProduct = async (req, res, next) => {
   try {
-    const resultFind = await Product.find({});
-    if (resultFind?.length === 0) {
-      throw new Error("Không lấy được sản phẩm");
+    const allProductsJSON = await redisClient.get("allproducts");
+    if (allProductsJSON) {
+      let resultsAll = null;
+      try {
+        resultsAll = JSON.parse(allProductsJSON);
+      } catch (error) {
+        throw new Error(error);
+      }
+      return res.status(200).json(resultsAll);
+    } else {
+      const resultFind = await Product.find({});
+      if (resultFind?.length === 0) {
+        throw new Error("Không lấy được sản phẩm");
+      }
+      const jsonString = JSON.stringify(resultFind);
+      await redisClient.set("allproducts", jsonString);
+      const resultsALl = {
+        total: resultFind.length,
+        products: resultFind,
+      };
+
+      return res.status(200).json(resultsALl);
     }
-    const resultsALl = {
-      total: resultFind.length,
-      products: resultFind,
-    };
-    return res.status(200).json(resultsALl);
   } catch (error) {
     console.log(error.message);
     next(error);
@@ -24,7 +37,6 @@ export const getAllProduct = async (req, res, next) => {
 
 export const getProduct = async (req, res, next) => {
   try {
-    console.log(req.params.id);
     const result = await Product.findById(req.params.id);
     if (result) {
       return res.status(200).json(result);
@@ -81,7 +93,6 @@ export const addProduct = async (req, res, next) => {
         }),
       };
     });
-
     const addProduct = new Product({
       title: req.body.title,
       description: req.body.description,
@@ -94,6 +105,8 @@ export const addProduct = async (req, res, next) => {
       category: req.body.category,
       thumbnail: thumbnail,
     });
+    await redisClient.deleteKey("allproducts");
+
     await addProduct.save();
 
     return res.status(200).json({

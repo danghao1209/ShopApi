@@ -13,7 +13,6 @@ export const getCart = async (req, res, next) => {
     if (!carts) {
       throw new Error("Không tìm thấy giỏ hàng");
     }
-    console.log(carts);
     res.status(200).json({ status: 1, data: carts });
   } catch (error) {
     console.log(error.message);
@@ -61,7 +60,7 @@ export const addCart = async (req, res, next) => {
         color: data.color.toString(),
         size: data.size.toString(),
       });
-      
+
       if (foundItem) {
         foundItem.quantity += 1;
       } else {
@@ -128,19 +127,43 @@ export const increaseCart = async (req, res, next) => {
   try {
     const { _id } = req.dataUser;
     const { data } = req.body;
+
+    if (!Number.isSafeInteger(data?.quantity)) {
+      throw new Error("Số lượng phải là số nguyên");
+    }
+
     if (data && data?.quantity > 0) {
       const { cartId } = await User.findOne({ _id });
+
+      if (!cartId) {
+        throw new Error("Giỏ hàng không tồn tại");
+      }
+
       const cart = await Cart.findById(cartId);
+
       if (!cart) {
         throw new Error("Giỏ hàng không tồn tại");
       }
+
       const { carts } = cart;
       const searchId = new mongoose.Types.ObjectId(data.id);
       const foundItem = _.find(carts, { _id: searchId });
+      const product = await Product.findOne({
+        _id: new mongoose.Types.ObjectId(foundItem.id),
+      });
+
       if (foundItem) {
-        foundItem.quantity = data.quantity;
+        if (
+          data.quantity >
+          product?.data[foundItem?.color]?.size?.[foundItem?.size]
+        ) {
+          throw new Error(
+            "Số lượng nhiều hơn số lượng của sản phẩm vui lòng giảm lại số lượng"
+          );
+        }
+        foundItem.quantity = parseInt(data.quantity);
       } else {
-        throw new Error("Lỗi");
+        throw new Error("Không tìm thấy sản phẩm này trong giỏ hàng");
       }
 
       cart.carts = carts;
@@ -155,6 +178,7 @@ export const increaseCart = async (req, res, next) => {
       throw new Error("Số lượng sản phẩm phải từ 1");
     }
   } catch (error) {
+    console.log(error.message);
     next(error);
   }
 };

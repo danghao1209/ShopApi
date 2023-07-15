@@ -4,6 +4,7 @@ import nodemailer from "nodemailer";
 import User from "../../Models/UserModel/index.js";
 import Cart from "../../Models/CartModel/index.js";
 import Otp from "../../Models/OtpModel/index.js";
+import redisClient from "../../Models/RedisClientModel/index.js";
 
 export const accessTokenNew = async (req, res, next) => {
   try {
@@ -186,19 +187,46 @@ export const changePassword = async (req, res, next) => {
 
 // send otp email
 
-const saveOtpToDatabase = async (email, otp) => {
-  const existingOtp = await Otp.findOne({ email });
+// const saveOtpToDatabase = async (email, otp) => {
+//   const existingOtp = await Otp.findOne({ email });
+//   if (existingOtp) {
+//     // OTP đã tồn tại cho email này, ghi đè OTP mới lên email cũ
+//     existingOtp.otp = otp;
+//     existingOtp.expiredAt = new Date(Date.now() + 5 * 60 * 1000); // Cập nhật thời gian hết hạn mới
+//     await existingOtp.save();
+//   } else {
+//     // OTP chưa tồn tại cho email này, tạo mới OTP và lưu vào cơ sở dữ liệu
+//     const newOtp = new Otp({ email, otp });
+//     await newOtp.save();
+//   }
+// };
+
+const saveOtpToRedis = async (email, otp) => {
+  const existingOtp = await redisClient.get(email);
   if (existingOtp) {
     // OTP đã tồn tại cho email này, ghi đè OTP mới lên email cũ
-    existingOtp.otp = otp;
-    existingOtp.expiredAt = new Date(Date.now() + 5 * 60 * 1000); // Cập nhật thời gian hết hạn mới
-    await existingOtp.save();
+    const oldOTP = JSON.parse(existingOtp);
+    if (oldOTP?.count > 5) {
+      throw new Error(
+        `Bạn đã gửi OTP quá nhiều lần vui lòng thử lại sau 5 phút`
+      );
+    }
+    const newOTP = {
+      otp: otp,
+      count: oldOTP.count + 1,
+    };
+
+    await redisClient.setWithTime(email, JSON.stringify(newOTP), 5 * 60);
   } else {
     // OTP chưa tồn tại cho email này, tạo mới OTP và lưu vào cơ sở dữ liệu
-    const newOtp = new Otp({ email, otp });
-    await newOtp.save();
+    const newOTP = {
+      otp: otp,
+      count: 1,
+    };
+    await redisClient.setWithTime(email, JSON.stringify(newOTP), 5 * 60);
   }
 };
+
 const generateOTP = () => {
   const min = 1000; // Giá trị nhỏ nhất của mã OTP (1000)
   const max = 9999; // Giá trị lớn nhất của mã OTP (9999)
@@ -259,11 +287,10 @@ export const sendOtp = async (req, res, next) => {
     };
 
     await transporter.sendMail(mailConfigs);
-    saveOtpToDatabase(email, OTP);
+    await saveOtpToRedis(email, OTP);
     return res.status(200).json({ message: "Email sent successfully" });
   } catch (error) {
     console.log(error.message);
-    error.message = "An error has occurred";
     next(error);
   }
 };
@@ -273,22 +300,23 @@ const isOtpValidForEmail = async (email, otp) => {
   if (!otp || !email) {
     return false;
   }
-  console.log(otp);
-  const otpRecord = await Otp.findOne({ email: email.toLowerCase(), otp });
+  const existingOtp = await redisClient.get(email);
 
-  if (!otpRecord) {
+  if (!existingOtp) {
     return false; // Mã OTP không tồn tại trong cơ sở dữ liệu
   }
 
-  if (otpRecord.expiredAt < Date.now()) {
-    return false; // Mã OTP đã hết hạn
+  const otpRedis = JSON.parse(existingOtp);
+
+  if (otp !== otpRedis?.otp) {
+    return false;
   }
 
   return true; // Mã OTP hợp lệ
 };
 
 const deleteOtp = async (email) => {
-  await Otp.deleteOne({ email });
+  await redisClient.deleteKey(email);
 };
 
 export const submitOtp = async (req, res, next) => {
@@ -306,7 +334,6 @@ export const submitOtp = async (req, res, next) => {
         expiresIn: "5m",
       }
     );
-    console.log(tokenValidateOtp);
     res.status(200).json({ token: tokenValidateOtp });
   } catch (error) {
     console.log(error);
