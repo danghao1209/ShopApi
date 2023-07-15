@@ -13,7 +13,11 @@ class RedisClient {
     return await this.redis.set(key, value);
   }
   async setWithTime(key, value, time) {
-    return await this.redis.psetex(key, value, time);
+    const timeInMilliseconds = parseInt(time, 10);
+    if (isNaN(timeInMilliseconds) || timeInMilliseconds < 0) {
+      throw new Error("Invalid time value");
+    }
+    return await this.redis.psetex(key, timeInMilliseconds, value);
   }
   async deleteKey(key) {
     return await this.redis.del(key);

@@ -220,8 +220,8 @@ const saveOtpToRedis = async (email, otp) => {
     };
     await redisClient.setWithTime(
       JSON.stringify(email).toLowerCase(),
-      JSON.stringify(newOTP),
-      5 * 60
+      300000,
+      JSON.stringify(newOTP)
     );
   } else {
     // OTP chưa tồn tại cho email này, tạo mới OTP và lưu vào cơ sở dữ liệu
@@ -231,8 +231,8 @@ const saveOtpToRedis = async (email, otp) => {
     };
     await redisClient.setWithTime(
       JSON.stringify(email).toLowerCase(),
-      JSON.stringify(newOTP),
-      5 * 60
+      300000,
+      JSON.stringify(newOTP)
     );
   }
 };
