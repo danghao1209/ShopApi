@@ -204,6 +204,7 @@ export const changePassword = async (req, res, next) => {
 const saveOtpToRedis = async (email, otp) => {
   try {
     const existingOtp = await redisClient.get(email?.toLowerCase());
+    console.log(existingOtp);
     if (existingOtp) {
       // OTP đã tồn tại cho email này, ghi đè OTP mới lên email cũ
       const oldOTP = JSON.parse(existingOtp);
@@ -221,6 +222,7 @@ const saveOtpToRedis = async (email, otp) => {
         JSON.stringify(newOTP),
         5 * 60
       );
+      console.log(resuult);
     } else {
       // OTP chưa tồn tại cho email này, tạo mới OTP và lưu vào cơ sở dữ liệu
       const newOTP = {
@@ -228,7 +230,12 @@ const saveOtpToRedis = async (email, otp) => {
         count: 1,
       };
 
-      await redisClient.setWithTime(email, JSON.stringify(newOTP), 5 * 60);
+      const resuult = await redisClient.setWithTime(
+        email,
+        JSON.stringify(newOTP),
+        5 * 60
+      );
+      console.log(resuult);
     }
   } catch (error) {
     console.log(error.message);
