@@ -11,6 +11,7 @@ import Product from "../../Models/ProductModel/index.js";
 const ordersQueue = new Queue();
 ordersQueue.autostart = true;
 ordersQueue.concurrency = 1;
+
 async function performTask(userId, ordersId, cartId, carts, data) {
   try {
     console.log("Đang thực hiện tác vụ");
@@ -112,13 +113,13 @@ async function performTask(userId, ordersId, cartId, carts, data) {
       { new: true }
     );
 
-    await Promise.all([
-      newOrders.save(),
-      updateCart.save(),
-      updateUser.save(),
-      ...updatedProduct.map((product) => product.save()),
-      listPrice.save(),
-    ]);
+    await Promise.all(
+      updatedProduct.map(async (product) => {
+        await product.save();
+      })
+    );
+
+    await Promise.all([newOrders.save(), updateCart.save(), updateUser.save()]);
 
     console.log(`Mua thành công id đơn: ${newOrders.id}!`);
   } catch (error) {
