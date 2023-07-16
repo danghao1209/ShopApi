@@ -25,7 +25,7 @@ async function performTask(userId, ordersId, cartId, carts, data) {
 
     const totalPrice = _.sumBy(carts, (cartItem) => {
       const product = _.find(listPrice, {
-        _id: new mongoose.Types.ObjectId(cartItem.id),
+        _id: mongoose.Types.ObjectId(cartItem.id),
       });
       if (product) {
         const discountedPrice = Math.round(
@@ -33,35 +33,61 @@ async function performTask(userId, ordersId, cartId, carts, data) {
         );
         return discountedPrice * cartItem.quantity;
       }
-      return null;
+      return 0;
     });
-    if (!totalPrice) {
-      throw new Error("Lỗi mua hàng vui lòng thử lại");
+
+    if (totalPrice === 0) {
+      throw new Error("Lỗi mua hàng, vui lòng thử lại");
     }
+
     const updatedCartItems = _.map(carts, (cartItem) => {
       const matchedProduct = _.find(listPrice, {
         _id: new mongoose.Types.ObjectId(cartItem.id),
       });
       if (matchedProduct) {
-        const plainCartItem = cartItem.toObject(); // Chuyển đổi thành đối tượng JavaScript thông thường
-        return {
+        const plainCartItem = cartItem.toObject();
+        const result = {
           ...plainCartItem,
           discountPercentage: matchedProduct.discountPercentage,
           price: matchedProduct.price,
-          image: matchedProduct.data[cartItem.color].images[0],
+          image: matchedProduct.data[cartItem.color]?.images[0] || "",
         };
+        return result;
       }
       return null;
     });
+
     if (!updatedCartItems) {
-      throw new Error("Lỗi mua hàng vui lòng thử lại");
+      throw new Error("Lỗi mua hàng, vui lòng thử lại");
+    }
+
+    const updatedProduct = _.map(carts, (cartItem) => {
+      const matchedProduct = _.find(listPrice, {
+        _id: new mongoose.Types.ObjectId(cartItem.id),
+      });
+      if (matchedProduct) {
+        if (
+          matchedProduct.data[cartItem.color] &&
+          matchedProduct.data[cartItem.color].size &&
+          matchedProduct.data[cartItem.color].size[cartItem.size]
+        ) {
+          matchedProduct.data[cartItem.color].size[cartItem.size] -=
+            cartItem.quantity;
+        }
+
+        return matchedProduct;
+      }
+      return null;
+    });
+
+    if (!updatedProduct) {
+      throw new Error("Lỗi mua hàng, vui lòng thử lại");
     }
 
     const freeShip = totalPrice > 700;
     const lastPrice = freeShip ? totalPrice : totalPrice + 30;
 
     const { phone, name, address, tinh, huyen, xa, note } = data;
-
     const newOrders = new Orders({
       dataOrder: updatedCartItems,
       totalPrice: totalPrice,
@@ -79,13 +105,20 @@ async function performTask(userId, ordersId, cartId, carts, data) {
       { carts: [], totalQuanlity: 0 },
       { new: true }
     );
+
     const updateUser = await User.findOneAndUpdate(
       { _id: userId },
       { ordersId: [...ordersId, newOrders.id] },
       { new: true }
     );
 
-    await Promise.all([newOrders.save(), updateCart.save(), updateUser.save()]);
+    await Promise.all([
+      newOrders.save(),
+      updateCart.save(),
+      updateUser.save(),
+      ...updatedProduct.map((product) => product.save()),
+      listPrice.save(),
+    ]);
 
     console.log(`Mua thành công id đơn: ${newOrders.id}!`);
   } catch (error) {

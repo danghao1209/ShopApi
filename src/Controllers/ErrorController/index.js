@@ -1,4 +1,4 @@
 export const handleError = (err, req, res, next) => {
-  console.err;
-  res.status(400).json({ error: err.message });
+  consolelog(err?.message);
+  res.status(400).json({ status: 0, message: err?.message });
 };
