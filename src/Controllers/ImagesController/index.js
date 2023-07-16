@@ -8,7 +8,7 @@ export const getImages = (req, res) => {
       `${req.params.name}`
     );
 
-    res.writeHead(200, { "Content-Type": "image/jpeg/png" });
+    //res.writeHead(200, { "Content-Type": "image/jpeg/png" });
 
     // const imageStream = fs.createReadStream(imagePath);
     // imageStream.pipe(res);
