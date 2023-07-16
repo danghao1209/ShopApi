@@ -13,6 +13,7 @@ export const getImages = (req, res) => {
     // const imageStream = fs.createReadStream(imagePath);
     // imageStream.pipe(res);
     // res.end();
+    console.log(imagePath);
     res.sendFile(imagePath);
   } catch (error) {
     console.log(error);
