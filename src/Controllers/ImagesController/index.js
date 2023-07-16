@@ -10,9 +10,10 @@ export const getImages = (req, res) => {
 
     res.writeHead(200, { "Content-Type": "image/jpeg/png" });
 
-    const imageStream = fs.createReadStream(imagePath);
-    imageStream.pipe(res);
-    res.end();
+    // const imageStream = fs.createReadStream(imagePath);
+    // imageStream.pipe(res);
+    // res.end();
+    res.sendFile(imagePath);
   } catch (error) {
     console.log(error);
     next(error);
