@@ -25,7 +25,7 @@ async function performTask(userId, ordersId, cartId, carts, data) {
 
     const totalPrice = _.sumBy(carts, (cartItem) => {
       const product = _.find(listPrice, {
-        _id: mongoose.Types.ObjectId(cartItem.id),
+        _id: new mongoose.Types.ObjectId(cartItem.id),
       });
       if (product) {
         const discountedPrice = Math.round(
