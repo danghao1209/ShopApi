@@ -85,41 +85,43 @@ async function performTask(userId, ordersId, cartId, carts, data) {
       throw new Error("Lỗi mua hàng, vui lòng thử lại");
     }
 
-    const freeShip = totalPrice > 700;
-    const lastPrice = freeShip ? totalPrice : totalPrice + 30;
+    console.log(updatedProduct);
 
-    const { phone, name, address, tinh, huyen, xa, note } = data;
-    const newOrders = new Orders({
-      dataOrder: updatedCartItems,
-      totalPrice: totalPrice,
-      lastPrice: lastPrice,
-      phone: phone,
-      name: name,
-      detailedAddress: { address, tinh, huyen, xa },
-      freeship: freeShip,
-      note: note,
-      status: "Chờ xác nhận",
-    });
+    // const freeShip = totalPrice > 700;
+    // const lastPrice = freeShip ? totalPrice : totalPrice + 30;
 
-    const updateCart = await Cart.findOneAndUpdate(
-      { _id: cartId },
-      { carts: [], totalQuanlity: 0 },
-      { new: true }
-    );
+    // const { phone, name, address, tinh, huyen, xa, note } = data;
+    // const newOrders = new Orders({
+    //   dataOrder: updatedCartItems,
+    //   totalPrice: totalPrice,
+    //   lastPrice: lastPrice,
+    //   phone: phone,
+    //   name: name,
+    //   detailedAddress: { address, tinh, huyen, xa },
+    //   freeship: freeShip,
+    //   note: note,
+    //   status: "Chờ xác nhận",
+    // });
 
-    const updateUser = await User.findOneAndUpdate(
-      { _id: userId },
-      { ordersId: [...ordersId, newOrders.id] },
-      { new: true }
-    );
+    // const updateCart = await Cart.findOneAndUpdate(
+    //   { _id: cartId },
+    //   { carts: [], totalQuanlity: 0 },
+    //   { new: true }
+    // );
 
-    await Promise.all(
-      updatedProduct.map(async (product) => {
-        await product.save();
-      })
-    );
+    // const updateUser = await User.findOneAndUpdate(
+    //   { _id: userId },
+    //   { ordersId: [...ordersId, newOrders.id] },
+    //   { new: true }
+    // );
 
-    await Promise.all([newOrders.save(), updateCart.save(), updateUser.save()]);
+    // await Promise.all(
+    //   updatedProduct.map(async (product) => {
+    //     await product.save();
+    //   })
+    // );
+
+    // await Promise.all([newOrders.save(), updateCart.save(), updateUser.save()]);
 
     console.log(`Mua thành công id đơn: ${newOrders.id}!`);
   } catch (error) {
