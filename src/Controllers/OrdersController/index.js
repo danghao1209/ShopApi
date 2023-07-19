@@ -46,108 +46,100 @@ async function performTask(userId, ordersId, cartId, carts, data) {
       throw new Error("Giỏ hàng trống");
     }
 
-    console.log(listProOfCart);
+    const totalPrice = _.sumBy(carts, (cartItem) => {
+      const product = _.find(listProOfCart, {
+        _id: new mongoose.Types.ObjectId(cartItem.id),
+      });
+      if (product) {
+        const discountedPrice = Math.round(
+          product.price * (1 - product.discountPercentage / 100)
+        );
+        return discountedPrice * cartItem.quantity;
+      }
+      return 0;
+    });
 
-    // const totalPrice = _.sumBy(carts, (cartItem) => {
-    //   const product = _.find(listPrice, {
-    //     _id: new mongoose.Types.ObjectId(cartItem.id),
-    //   });
-    //   if (product) {
-    //     const discountedPrice = Math.round(
-    //       product.price * (1 - product.discountPercentage / 100)
-    //     );
-    //     return discountedPrice * cartItem.quantity;
-    //   }
-    //   return 0;
-    // });
+    if (totalPrice === 0) {
+      throw new Error("Lỗi mua hàng, vui lòng thử lại");
+    }
 
-    // if (totalPrice === 0) {
-    //   throw new Error("Lỗi mua hàng, vui lòng thử lại");
-    // }
+    const updatedCartItems = _.map(carts, (cartItem) => {
+      const matchedProduct = _.find(listProOfCart, {
+        _id: new mongoose.Types.ObjectId(cartItem.id),
+      });
+      if (matchedProduct) {
+        const plainCartItem = cartItem.toObject();
+        const result = {
+          ...plainCartItem,
+          discountPercentage: matchedProduct.discountPercentage,
+          price: matchedProduct.price,
+          image: matchedProduct.data[cartItem.color]?.images[0] || "",
+        };
+        return result;
+      }
+      return null;
+    });
 
-    // const updatedCartItems = _.map(carts, (cartItem) => {
-    //   const matchedProduct = _.find(listPrice, {
-    //     _id: new mongoose.Types.ObjectId(cartItem.id),
-    //   });
-    //   if (matchedProduct) {
-    //     const plainCartItem = cartItem.toObject();
-    //     const result = {
-    //       ...plainCartItem,
-    //       discountPercentage: matchedProduct.discountPercentage,
-    //       price: matchedProduct.price,
-    //       image: matchedProduct.data[cartItem.color]?.images[0] || "",
-    //     };
-    //     return result;
-    //   }
-    //   return null;
-    // });
+    if (!updatedCartItems) {
+      throw new Error("Lỗi mua hàng, vui lòng thử lại");
+    }
 
-    // if (!updatedCartItems) {
-    //   throw new Error("Lỗi mua hàng, vui lòng thử lại");
-    // }
+    const updatedProduct = _.map(newCart, (cartItem) => {
+      const matchedProduct = _.find(listProOfCart, {
+        _id: new mongoose.Types.ObjectId(cartItem.id),
+      });
+      if (matchedProduct) {
+        cartItem.data.forEach((item) => {
+          matchedProduct.data[item.color].size[item.size] -= item.quantity;
+          matchedProduct.data[item.color].stock += item.quantity;
+        });
 
-    // const updatedProduct = _.map(carts, (cartItem) => {
-    //   const matchedProduct = _.find(listPrice, {
-    //     _id: new mongoose.Types.ObjectId(cartItem.id),
-    //   });
-    //   if (matchedProduct) {
-    //     if (
-    //       matchedProduct.data[cartItem.color] &&
-    //       matchedProduct.data[cartItem.color].size &&
-    //       matchedProduct.data[cartItem.color].size[cartItem.size]
-    //     ) {
-    //       matchedProduct.data[cartItem.color].size[cartItem.size] -=
-    //         cartItem.quantity;
-    //     }
+        return matchedProduct;
+      }
+      return null;
+    });
 
-    //     return matchedProduct;
-    //   }
-    //   return null;
-    // });
+    if (!updatedProduct) {
+      throw new Error("Lỗi mua hàng, vui lòng thử lại");
+    }
 
-    // if (!updatedProduct) {
-    //   throw new Error("Lỗi mua hàng, vui lòng thử lại");
-    // }
+    const freeShip = totalPrice > 700;
+    const lastPrice = freeShip ? totalPrice : totalPrice + 30;
 
-    // console.log(carts);
+    const { phone, name, address, tinh, huyen, xa, note } = data;
+    const newOrders = new Orders({
+      dataOrder: updatedCartItems,
+      totalPrice: totalPrice,
+      lastPrice: lastPrice,
+      phone: phone,
+      name: name,
+      detailedAddress: { address, tinh, huyen, xa },
+      freeship: freeShip,
+      note: note,
+      status: "Chờ xác nhận",
+    });
 
-    // const freeShip = totalPrice > 700;
-    // const lastPrice = freeShip ? totalPrice : totalPrice + 30;
+    const updateCart = await Cart.findOneAndUpdate(
+      { _id: cartId },
+      { carts: [], totalQuanlity: 0 },
+      { new: true }
+    );
 
-    // const { phone, name, address, tinh, huyen, xa, note } = data;
-    // const newOrders = new Orders({
-    //   dataOrder: updatedCartItems,
-    //   totalPrice: totalPrice,
-    //   lastPrice: lastPrice,
-    //   phone: phone,
-    //   name: name,
-    //   detailedAddress: { address, tinh, huyen, xa },
-    //   freeship: freeShip,
-    //   note: note,
-    //   status: "Chờ xác nhận",
-    // });
+    const updateUser = await User.findOneAndUpdate(
+      { _id: userId },
+      { ordersId: [...ordersId, newOrders.id] },
+      { new: true }
+    );
 
-    // const updateCart = await Cart.findOneAndUpdate(
-    //   { _id: cartId },
-    //   { carts: [], totalQuanlity: 0 },
-    //   { new: true }
-    // );
+    await Promise.all(
+      updatedProduct.map(async (product) => {
+        await product.save();
+      })
+    );
 
-    // const updateUser = await User.findOneAndUpdate(
-    //   { _id: userId },
-    //   { ordersId: [...ordersId, newOrders.id] },
-    //   { new: true }
-    // );
+    await Promise.all([newOrders.save(), updateCart.save(), updateUser.save()]);
 
-    // await Promise.all(
-    //   updatedProduct.map(async (product) => {
-    //     await product.save();
-    //   })
-    // );
-
-    // await Promise.all([newOrders.save(), updateCart.save(), updateUser.save()]);
-
-    // console.log(`Mua thành công id đơn: ${newOrders.id}!`);
+    console.log(`Mua thành công id đơn: ${newOrders.id}!`);
   } catch (error) {
     console.log(error.message);
     throw error;
