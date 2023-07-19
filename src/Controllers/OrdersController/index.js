@@ -111,43 +111,43 @@ async function performTask(userId, ordersId, cartId, carts, data) {
 
     // console.log(carts);
 
-    const freeShip = totalPrice > 700;
-    const lastPrice = freeShip ? totalPrice : totalPrice + 30;
+    // const freeShip = totalPrice > 700;
+    // const lastPrice = freeShip ? totalPrice : totalPrice + 30;
 
-    const { phone, name, address, tinh, huyen, xa, note } = data;
-    const newOrders = new Orders({
-      dataOrder: updatedCartItems,
-      totalPrice: totalPrice,
-      lastPrice: lastPrice,
-      phone: phone,
-      name: name,
-      detailedAddress: { address, tinh, huyen, xa },
-      freeship: freeShip,
-      note: note,
-      status: "Chờ xác nhận",
-    });
+    // const { phone, name, address, tinh, huyen, xa, note } = data;
+    // const newOrders = new Orders({
+    //   dataOrder: updatedCartItems,
+    //   totalPrice: totalPrice,
+    //   lastPrice: lastPrice,
+    //   phone: phone,
+    //   name: name,
+    //   detailedAddress: { address, tinh, huyen, xa },
+    //   freeship: freeShip,
+    //   note: note,
+    //   status: "Chờ xác nhận",
+    // });
 
-    const updateCart = await Cart.findOneAndUpdate(
-      { _id: cartId },
-      { carts: [], totalQuanlity: 0 },
-      { new: true }
-    );
+    // const updateCart = await Cart.findOneAndUpdate(
+    //   { _id: cartId },
+    //   { carts: [], totalQuanlity: 0 },
+    //   { new: true }
+    // );
 
-    const updateUser = await User.findOneAndUpdate(
-      { _id: userId },
-      { ordersId: [...ordersId, newOrders.id] },
-      { new: true }
-    );
+    // const updateUser = await User.findOneAndUpdate(
+    //   { _id: userId },
+    //   { ordersId: [...ordersId, newOrders.id] },
+    //   { new: true }
+    // );
 
-    await Promise.all(
-      updatedProduct.map(async (product) => {
-        await product.save();
-      })
-    );
+    // await Promise.all(
+    //   updatedProduct.map(async (product) => {
+    //     await product.save();
+    //   })
+    // );
 
-    await Promise.all([newOrders.save(), updateCart.save(), updateUser.save()]);
+    // await Promise.all([newOrders.save(), updateCart.save(), updateUser.save()]);
 
-    console.log(`Mua thành công id đơn: ${newOrders.id}!`);
+    // console.log(`Mua thành công id đơn: ${newOrders.id}!`);
   } catch (error) {
     console.log(error.message);
     throw error;
