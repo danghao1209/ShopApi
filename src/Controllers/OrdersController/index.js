@@ -12,118 +12,142 @@ const ordersQueue = new Queue();
 ordersQueue.autostart = true;
 ordersQueue.concurrency = 1;
 
+function mergeObjectsWithSameId(data) {
+  // Sử dụng hàm groupBy của Lodash để nhóm các object theo id
+  const groupedData = _.groupBy(data, "id");
+
+  // Duyệt qua các nhóm và tạo mảng mới với key data chứa các object { quantity, color, size }
+  const mergedDataArray = _.map(groupedData, (group) => {
+    const { id } = group[0];
+    const data = group.map(({ quantity, color, size }) => ({
+      quantity,
+      color,
+      size,
+    }));
+    return { id, data };
+  });
+
+  return mergedDataArray;
+}
+
 async function performTask(userId, ordersId, cartId, carts, data) {
   try {
     console.log("Đang thực hiện tác vụ");
 
-    const listIdProductInCart = carts.map((item) => item.id);
+    const newCart = mergeObjectsWithSameId(carts);
 
-    const listPrice = await Product.find({ _id: { $in: listIdProductInCart } });
+    const listIdProductInCart = newCart.map((item) => item.id);
 
-    if (listPrice?.length === 0) {
+    const listProOfCart = await Product.find({
+      _id: { $in: listIdProductInCart },
+    });
+
+    if (listProOfCart?.length === 0) {
       throw new Error("Giỏ hàng trống");
     }
 
-    const totalPrice = _.sumBy(carts, (cartItem) => {
-      const product = _.find(listPrice, {
-        _id: new mongoose.Types.ObjectId(cartItem.id),
-      });
-      if (product) {
-        const discountedPrice = Math.round(
-          product.price * (1 - product.discountPercentage / 100)
-        );
-        return discountedPrice * cartItem.quantity;
-      }
-      return 0;
-    });
+    console.log(listProOfCart);
 
-    if (totalPrice === 0) {
-      throw new Error("Lỗi mua hàng, vui lòng thử lại");
-    }
-
-    const updatedCartItems = _.map(carts, (cartItem) => {
-      const matchedProduct = _.find(listPrice, {
-        _id: new mongoose.Types.ObjectId(cartItem.id),
-      });
-      if (matchedProduct) {
-        const plainCartItem = cartItem.toObject();
-        const result = {
-          ...plainCartItem,
-          discountPercentage: matchedProduct.discountPercentage,
-          price: matchedProduct.price,
-          image: matchedProduct.data[cartItem.color]?.images[0] || "",
-        };
-        return result;
-      }
-      return null;
-    });
-
-    if (!updatedCartItems) {
-      throw new Error("Lỗi mua hàng, vui lòng thử lại");
-    }
-
-    const updatedProduct = _.map(carts, (cartItem) => {
-      const matchedProduct = _.find(listPrice, {
-        _id: new mongoose.Types.ObjectId(cartItem.id),
-      });
-      if (matchedProduct) {
-        if (
-          matchedProduct.data[cartItem.color] &&
-          matchedProduct.data[cartItem.color].size &&
-          matchedProduct.data[cartItem.color].size[cartItem.size]
-        ) {
-          matchedProduct.data[cartItem.color].size[cartItem.size] -=
-            cartItem.quantity;
-        }
-
-        return matchedProduct;
-      }
-      return null;
-    });
-
-    if (!updatedProduct) {
-      throw new Error("Lỗi mua hàng, vui lòng thử lại");
-    }
-
-    console.log(carts);
-
-    // const freeShip = totalPrice > 700;
-    // const lastPrice = freeShip ? totalPrice : totalPrice + 30;
-
-    // const { phone, name, address, tinh, huyen, xa, note } = data;
-    // const newOrders = new Orders({
-    //   dataOrder: updatedCartItems,
-    //   totalPrice: totalPrice,
-    //   lastPrice: lastPrice,
-    //   phone: phone,
-    //   name: name,
-    //   detailedAddress: { address, tinh, huyen, xa },
-    //   freeship: freeShip,
-    //   note: note,
-    //   status: "Chờ xác nhận",
+    // const totalPrice = _.sumBy(carts, (cartItem) => {
+    //   const product = _.find(listPrice, {
+    //     _id: new mongoose.Types.ObjectId(cartItem.id),
+    //   });
+    //   if (product) {
+    //     const discountedPrice = Math.round(
+    //       product.price * (1 - product.discountPercentage / 100)
+    //     );
+    //     return discountedPrice * cartItem.quantity;
+    //   }
+    //   return 0;
     // });
 
-    // const updateCart = await Cart.findOneAndUpdate(
-    //   { _id: cartId },
-    //   { carts: [], totalQuanlity: 0 },
-    //   { new: true }
-    // );
+    // if (totalPrice === 0) {
+    //   throw new Error("Lỗi mua hàng, vui lòng thử lại");
+    // }
 
-    // const updateUser = await User.findOneAndUpdate(
-    //   { _id: userId },
-    //   { ordersId: [...ordersId, newOrders.id] },
-    //   { new: true }
-    // );
+    // const updatedCartItems = _.map(carts, (cartItem) => {
+    //   const matchedProduct = _.find(listPrice, {
+    //     _id: new mongoose.Types.ObjectId(cartItem.id),
+    //   });
+    //   if (matchedProduct) {
+    //     const plainCartItem = cartItem.toObject();
+    //     const result = {
+    //       ...plainCartItem,
+    //       discountPercentage: matchedProduct.discountPercentage,
+    //       price: matchedProduct.price,
+    //       image: matchedProduct.data[cartItem.color]?.images[0] || "",
+    //     };
+    //     return result;
+    //   }
+    //   return null;
+    // });
 
-    // await Promise.all(
-    //   updatedProduct.map(async (product) => {
-    //     await product.save();
-    //   })
-    // );
+    // if (!updatedCartItems) {
+    //   throw new Error("Lỗi mua hàng, vui lòng thử lại");
+    // }
 
-    // await Promise.all([newOrders.save(), updateCart.save(), updateUser.save()]);
+    // const updatedProduct = _.map(carts, (cartItem) => {
+    //   const matchedProduct = _.find(listPrice, {
+    //     _id: new mongoose.Types.ObjectId(cartItem.id),
+    //   });
+    //   if (matchedProduct) {
+    //     if (
+    //       matchedProduct.data[cartItem.color] &&
+    //       matchedProduct.data[cartItem.color].size &&
+    //       matchedProduct.data[cartItem.color].size[cartItem.size]
+    //     ) {
+    //       matchedProduct.data[cartItem.color].size[cartItem.size] -=
+    //         cartItem.quantity;
+    //     }
 
-    //console.log(`Mua thành công id đơn: ${newOrders.id}!`);
+    //     return matchedProduct;
+    //   }
+    //   return null;
+    // });
+
+    // if (!updatedProduct) {
+    //   throw new Error("Lỗi mua hàng, vui lòng thử lại");
+    // }
+
+    // console.log(carts);
+
+    const freeShip = totalPrice > 700;
+    const lastPrice = freeShip ? totalPrice : totalPrice + 30;
+
+    const { phone, name, address, tinh, huyen, xa, note } = data;
+    const newOrders = new Orders({
+      dataOrder: updatedCartItems,
+      totalPrice: totalPrice,
+      lastPrice: lastPrice,
+      phone: phone,
+      name: name,
+      detailedAddress: { address, tinh, huyen, xa },
+      freeship: freeShip,
+      note: note,
+      status: "Chờ xác nhận",
+    });
+
+    const updateCart = await Cart.findOneAndUpdate(
+      { _id: cartId },
+      { carts: [], totalQuanlity: 0 },
+      { new: true }
+    );
+
+    const updateUser = await User.findOneAndUpdate(
+      { _id: userId },
+      { ordersId: [...ordersId, newOrders.id] },
+      { new: true }
+    );
+
+    await Promise.all(
+      updatedProduct.map(async (product) => {
+        await product.save();
+      })
+    );
+
+    await Promise.all([newOrders.save(), updateCart.save(), updateUser.save()]);
+
+    console.log(`Mua thành công id đơn: ${newOrders.id}!`);
   } catch (error) {
     console.log(error.message);
     throw error;
