@@ -85,7 +85,7 @@ async function performTask(userId, ordersId, cartId, carts, data) {
       throw new Error("Lỗi mua hàng, vui lòng thử lại");
     }
 
-    console.log(updatedProduct);
+    console.log(carts);
 
     // const freeShip = totalPrice > 700;
     // const lastPrice = freeShip ? totalPrice : totalPrice + 30;
@@ -123,7 +123,7 @@ async function performTask(userId, ordersId, cartId, carts, data) {
 
     // await Promise.all([newOrders.save(), updateCart.save(), updateUser.save()]);
 
-    console.log(`Mua thành công id đơn: ${newOrders.id}!`);
+    //console.log(`Mua thành công id đơn: ${newOrders.id}!`);
   } catch (error) {
     console.log(error.message);
     throw error;
