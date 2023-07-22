@@ -4,6 +4,8 @@ import bodyParser from "body-parser";
 import mongoose from "mongoose";
 import rateLimit from "express-rate-limit";
 import cors from "cors";
+import helmet from "helmet";
+import compression from "compression";
 
 import productRoute from "./src/Routes/ProductRoute/index.js";
 import imagesRoute from "./src/Routes/ImagesRoute/index.js";
@@ -40,6 +42,8 @@ app.use(bodyParser.urlencoded({ limit: "50mb", extended: true }));
 app.use(express.static(`public`));
 app.use(cors());
 app.use(apiLimiter);
+app.use(helmet());
+app.use(compression());
 
 app.use("/api/product/", productRoute);
 app.use("/api/info/", userInfoRoute);
