@@ -11,7 +11,7 @@ const productSchema = new mongoose.Schema(
     title: { type: String, required: true, unique: true },
     description: [{ type: String, required: true }],
     price: { type: Number, required: true },
-    new: { type: Boolean, required: true, default: false },
+    isNew: { type: Boolean, required: true, default: false },
     discountPercentage: {
       type: Number,
       required: true,
