@@ -1,5 +1,7 @@
 import mongoose from "mongoose";
 
+const ImageSche = new mongoose.Schema({ id: String, url: String });
+
 const productSchema = new mongoose.Schema(
   {
     _id: {
@@ -26,15 +28,15 @@ const productSchema = new mongoose.Schema(
           L: { type: Number, default: 0, min: 0 },
         },
         stock: { type: Number, required: true, default: 0, min: 0 },
-        color: { type: String, required: true, default: "#111827" },
-        images: [{ type: String, required: true }],
+        color: { type: String, required: true },
+        images: [ImageSche],
       },
     ],
     brand: { type: String, required: true, default: "" },
     category: { type: String, required: true },
-    thumbnail: [{ type: String, required: true }],
+    thumbnail: [ImageSche],
   },
-  { timestamps: true }
+  { timestamps: true },
 );
 
 var Product = mongoose.model("Product", productSchema, "products");

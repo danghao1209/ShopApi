@@ -6,7 +6,7 @@ import {
   searchPro,
 } from "../../Controllers/ProductController/index.js";
 import { handleError } from "../../Controllers/ErrorController/index.js";
-import { upload } from "../../Controllers/UploadImageController/upload.js";
+import upload from "../../Controllers/UploadImageController/upload.js";
 import { verifyAccessToken } from "../../Middleware/VeryfiToken/index.js";
 
 const productRoute = express.Router();
@@ -21,7 +21,26 @@ productRoute.post(
     { name: "images", maxCount: 8 },
   ]),
   addProduct,
-  handleError
+  handleError,
+);
+productRoute.post(
+  "/addprepro",
+  verifyAccessToken,
+  upload.fields([{ name: "thumb1" }, { name: "thumb2" }]),
+  addProduct,
+  handleError,
+);
+productRoute.post(
+  "/adddataforpro",
+  verifyAccessToken,
+  upload.fields([
+    { name: "image1" },
+    { name: "image2" },
+    { name: "image3" },
+    { name: "image4" },
+  ]),
+  addProduct,
+  handleError,
 );
 productRoute.post("/search", searchPro, handleError);
 
