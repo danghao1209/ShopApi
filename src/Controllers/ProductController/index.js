@@ -163,7 +163,7 @@ export const addPreDataProduct = async (req, res, next) => {
       price,
       discountPercentage,
       rating,
-      isNew,
+      isNewPro,
       brand,
       category,
     } = req.body;
@@ -201,7 +201,7 @@ export const addPreDataProduct = async (req, res, next) => {
       price: price,
       discountPercentage: discountPercentage,
       rating: rating,
-      isNew: isNew,
+      isNewPro: isNewPro,
       data: [],
       brand: brand,
       category: category,
