@@ -4,6 +4,8 @@ import {
   getProduct,
   addProduct,
   searchPro,
+  addPreDataProduct,
+  addDataForProduct,
 } from "../../Controllers/ProductController/index.js";
 import { handleError } from "../../Controllers/ErrorController/index.js";
 import upload from "../../Controllers/UploadImageController/upload.js";
@@ -27,7 +29,7 @@ productRoute.post(
   "/addprepro",
   verifyAccessToken,
   upload.fields([{ name: "thumb1" }, { name: "thumb2" }]),
-  addProduct,
+  addPreDataProduct,
   handleError,
 );
 productRoute.post(
@@ -39,7 +41,7 @@ productRoute.post(
     { name: "image3" },
     { name: "image4" },
   ]),
-  addProduct,
+  addDataForProduct,
   handleError,
 );
 productRoute.post("/search", searchPro, handleError);
