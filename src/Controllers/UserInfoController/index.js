@@ -1,3 +1,4 @@
+import Orders from "../../Models/OrdersModel/index.js";
 import User from "../../Models/UserModel/index.js";
 
 export const userInfo = async (req, res, next) => {
@@ -11,23 +12,6 @@ export const userInfo = async (req, res, next) => {
       return res
         .status(401)
         .json({ status: 0, message: "Không tìm thấy user" });
-    }
-  } catch (error) {
-    console.log(error.message);
-    next(error);
-  }
-};
-
-export const ordersInfo = async (req, res, next) => {
-  try {
-    let { _id } = req.dataUser;
-    const resultFind = await User.findOne({ _id });
-    if (resultFind) {
-      const { ordersId } = resultFind;
-      //thiếu lấy ra được các id rồi thì phải kiếm ra từng sản phẩm của order
-      return res.status(200).json({ status: 1, data: { ordersId } });
-    } else {
-      throw new Error("Không tìm thấy đơn hàng");
     }
   } catch (error) {
     console.log(error.message);
@@ -79,6 +63,37 @@ export const getAddressInfo = async (req, res, next) => {
     } else {
       throw new Error("No user found");
     }
+  } catch (error) {
+    console.log(error.message);
+    next(error);
+  }
+};
+
+export const getOrders = async (req, res, next) => {
+  try {
+    const { _id } = req.dataUser;
+    const user = await User.findById(_id);
+    if (!user) {
+      throw new Error("Không tìm thấy user");
+    }
+    const listOrders = await Orders.find({ _id: { $in: user.ordersId } });
+    res.status(200).json({ status: 1, data: listOrders });
+  } catch (error) {
+    console.log(error.message);
+    next(error);
+  }
+};
+
+export const ordersInfo = async (req, res, next) => {
+  try {
+    let { _id } = req.dataUser;
+    const resultFind = await User.findOne({ _id });
+    if (!resultFind) {
+      throw new Error("Không tìm thấy đơn hàng");
+    }
+    const { ordersId } = resultFind;
+    //thiếu lấy ra được các id rồi thì phải kiếm ra từng sản phẩm của order
+    return res.status(200).json({ status: 1, data: { ordersId } });
   } catch (error) {
     console.log(error.message);
     next(error);

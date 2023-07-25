@@ -5,6 +5,7 @@ import {
   ordersInfo,
   addressInfo,
   getAddressInfo,
+  getOrders,
 } from "../../Controllers/UserInfoController/index.js";
 import { handleError } from "../../Controllers/ErrorController/index.js";
 import { ValidatePhone } from "../../Middleware/ValidatePhone/index.js";
@@ -13,13 +14,14 @@ import { verifyAccessToken } from "../../Middleware/VeryfiToken/index.js";
 const userInfoRoute = express.Router();
 
 userInfoRoute.get("/", verifyAccessToken, userInfo, handleError);
-userInfoRoute.get("/orders", verifyAccessToken, ordersInfo, handleError);
+userInfoRoute.get("/orders", verifyAccessToken, getOrders, handleError);
+userInfoRoute.get("/order/:id", verifyAccessToken, ordersInfo, handleError);
 userInfoRoute.post(
   "/address",
   verifyAccessToken,
   ValidatePhone,
   addressInfo,
-  handleError
+  handleError,
 );
 userInfoRoute.get("/address", verifyAccessToken, getAddressInfo, handleError);
 

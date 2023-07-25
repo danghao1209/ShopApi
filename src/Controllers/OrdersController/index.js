@@ -52,7 +52,7 @@ async function performTask(userId, ordersId, cartId, carts, data) {
       });
       if (product) {
         const discountedPrice = Math.round(
-          product.price * (1 - product.discountPercentage / 100)
+          product.price * (1 - product.discountPercentage / 100),
         );
         return discountedPrice * cartItem.quantity;
       }
@@ -122,19 +122,19 @@ async function performTask(userId, ordersId, cartId, carts, data) {
     const updateCart = await Cart.findOneAndUpdate(
       { _id: cartId },
       { carts: [], totalQuanlity: 0 },
-      { new: true }
+      { new: true },
     );
 
     const updateUser = await User.findOneAndUpdate(
       { _id: userId },
       { ordersId: [...ordersId, newOrders.id] },
-      { new: true }
+      { new: true },
     );
 
     await Promise.all(
       updatedProduct.map(async (product) => {
         await product.save();
-      })
+      }),
     );
 
     await Promise.all([newOrders.save(), updateCart.save(), updateUser.save()]);
@@ -178,7 +178,7 @@ export const orderPayment = async (req, res, next) => {
       total: carts.reduce((total, cur) => total + cur.price, 0),
       lastPrice: carts.reduce(
         (total, cur) => total + cur.price - cur.price * cur.discountPercentage,
-        0
+        0,
       ),
       orderStatus: "Chờ xác nhận",
     });
