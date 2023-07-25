@@ -230,7 +230,7 @@ export const addDataForProduct = async (req, res, next) => {
     if (!id || !S || !M || !L || !color) {
       throw new Error("Thiếu thông tin sản phẩm");
     }
-    const result = await Product.findById({ id });
+    const result = await Product.findById(id);
     if (!result) {
       throw new Error("Không tìm thấy sản phẩm");
     }
