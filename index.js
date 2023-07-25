@@ -6,6 +6,7 @@ import rateLimit from "express-rate-limit";
 import cors from "cors";
 import helmet from "helmet";
 import compression from "compression";
+import { v2 as cloudinary } from "cloudinary";
 
 import productRoute from "./src/Routes/ProductRoute/index.js";
 import imagesRoute from "./src/Routes/ImagesRoute/index.js";
@@ -17,6 +18,11 @@ import searchRoute from "./src/Routes/SearchRoute/index.js";
 import authRoute from "./src/Routes/AuthRoute/index.js";
 
 dotenv.config();
+cloudinary.config({
+  cloud_name: "dnsskwfqr",
+  api_key: process.env.API_KEY_CLOUDINARY,
+  api_secret: process.env.API_SECRET_CLOUDINARY,
+});
 
 try {
   async function connectDb() {

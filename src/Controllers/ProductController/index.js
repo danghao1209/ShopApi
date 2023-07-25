@@ -5,12 +5,6 @@ import { redisClient } from "../../Models/Redis/index.js";
 import Product from "../../Models/ProductModel/index.js";
 import { v2 as cloudinary } from "cloudinary";
 
-cloudinary.config({
-  cloud_name: "dnsskwfqr",
-  api_key: "548315326329565",
-  api_secret: "QKrI5zKxKT6mftbdcNkBk_Ije7M",
-});
-
 export const getAllProduct = async (req, res, next) => {
   try {
     const allProductsJSON = await redisClient.get("allproducts");
