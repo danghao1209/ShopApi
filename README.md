@@ -57,6 +57,10 @@
 To create a Restful API for the DahaClown website, I created this API using Nodejs, ExpressJs, and more.
 Using JWT to Authentication.
 
+Send OTP by email to forget the password. Redis helps to cache OTP and not send more than 5 times within 5 minutes.
+
+Use a queue to process purchase orders to avoid buying when there is only 1 product left that many people buy. In the future will move to microservices and use Kafka.
+
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
 
